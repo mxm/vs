@@ -64,12 +64,12 @@ int main (int argc, char *argv[]){
 			assert(res == MPI_SUCCESS);
 			printf("Sum received => sum: %i\n",sum);
 			totalsum += sum;
-		}		
-		
+		}
+
 		printf("The total sum is: %i\n", totalsum);
 		assert(totalsum == n);
 
-	/* Other processes sum up received array elements */		
+	/* Other processes sum up received array elements */
 	}else{
 		/* Receive number of elements */
 		int count = 0;
@@ -85,13 +85,13 @@ int main (int argc, char *argv[]){
 		int sum = 0;
 		for(i = 0; i < count; i++)
 			sum += buf[i];
-		
+
 		//printf("Sum calculated by process %i => sum: %i\n",myid,sum);
-		
+
 		/* Send sum to master */
 		res = MPI_Send(&sum, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
-		assert(res == MPI_SUCCESS);	
-	}	
+		assert(res == MPI_SUCCESS);
+	}
 
 	MPI_Finalize();
 	return 1;
