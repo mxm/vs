@@ -1,0 +1,13 @@
+1.3:
+
+1. Dense Linear Algebra, da wir auf einem Vector (Array) arbeiten und
+ eine algebrahische Operation ausführen. Außerdem haben wir, glaube ich
+ strided access fürs memory.
+
+
+1.4:
+- a): Single Instruction Multiple Data (SIMD), da alle Prozesse die gleichen Instruktionen ausführen (SI)
+     und dann jeder Prozess seine Daten zurückliefert (MD).
+
+- b): Eine andere Möglichkeit wäre, per Schleife über das Array zu iterieren und die Summe in einer Variable
+      zu speichern. Das würde SISD entsprechen, da es nur einen Instruktionsstrom und einen Datenstrom gibt.
