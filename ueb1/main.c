@@ -25,6 +25,8 @@ int main (int argc, char *argv[]){
 	assert(numprocs > 1);
 	workers = numprocs - 1;
 
+	/* We fail if no input available */
+	assert(argc > 1);
 	/* Convert input to number */
 	int n = atoi(argv[1]);
 	assert(n > 0);

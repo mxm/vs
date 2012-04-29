@@ -1,4 +1,3 @@
-vs
+Verteilte Systeme
 ==
 
-Verteilte Systeme
