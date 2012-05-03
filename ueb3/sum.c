@@ -12,6 +12,9 @@ int main(int argc, char *argv[]) {
     sum = 0;
 
 	/* Convert input to number */
+
+    assert(argv[1] != NULL);
+
 	n = atoi(argv[1]);
 
     assert(n > 0);
