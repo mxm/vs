@@ -40,7 +40,7 @@ int main (int argc, char *argv[]){
 	if(myid == 0){
 		/* Create Array with 1s */
 		printf("Creating Array with size %i\nWill send this array to %i processes\n", n, workers);
-		array = malloc(n * sizeof(int*));
+		array = malloc(n * sizeof(int));
 		for (i = 0; i < n; i++)
 			array[i] = 1;
 
@@ -78,7 +78,7 @@ int main (int argc, char *argv[]){
 		res = MPI_Recv(&count, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		assert(res == MPI_SUCCESS);
 
-		buf = malloc(count*sizeof(int*));
+		buf = malloc(count*sizeof(int));
 
 		/* Receive actual elements */
 		res = MPI_Recv(buf, count, MPI_INT, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
