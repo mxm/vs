@@ -3,11 +3,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <omp.h>
-#include <time.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 int main(int argc, char *argv[]) {
 
     int i, n, sum;
+    struct timeval start, stop;
 
     sum = 0;
 
@@ -35,15 +37,20 @@ int main(int argc, char *argv[]) {
         input[i] = 1;
     }
 
+    gettimeofday(&start, NULL);
+
 #pragma omp parallel for reduction(+:sum)
     //compute the sum
     for(i = 0; i < n; i++) {
         sum = sum + input[i];
     }
 
+    gettimeofday(&stop, NULL);
+
     assert(sum == n);
 
-    printf("Sum is: %d\n", sum);
+    //printf("Sum is: %d\n", sum);
+    printf("Time: %ld\n", stop.tv_usec - start.tv_usec);
 
     exit(0);
 

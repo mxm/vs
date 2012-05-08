@@ -74,6 +74,62 @@ Es wir d ein Intel(R) Core(TM)2 CPU mit zwei 2.00GHz Kernen verwendet.
 
 ##2.
 
-TBD
+Beobachten Sie Ihr Program mit unterschiedlich vielen Threads und
+Array-Größen und erörtern Sie die Laufzeit.
+
+    OMP_NUM_THREADS=1 ./sum 1024
+    Using 1 threads in parallel sections.
+    Time: 6
+    OMP_NUM_THREADS=1 ./sum 2048
+    Using 1 threads in parallel sections.
+    Time: 11
+    OMP_NUM_THREADS=1 ./sum 4096
+    Using 1 threads in parallel sections.
+    Time: 19
+    OMP_NUM_THREADS=1 ./sum 8192
+    Using 1 threads in parallel sections.
+    Time: 37
+    OMP_NUM_THREADS=2 ./sum 1024
+    Using 2 threads in parallel sections.
+    Time: 7
+    OMP_NUM_THREADS=2 ./sum 2048
+    Using 2 threads in parallel sections.
+    Time: 9
+    OMP_NUM_THREADS=2 ./sum 4096
+    Using 2 threads in parallel sections.
+    Time: 13
+    OMP_NUM_THREADS=2 ./sum 8192
+    Using 2 threads in parallel sections.
+    Time: 22
+    OMP_NUM_THREADS=4 ./sum 1024
+    Using 4 threads in parallel sections.
+    Time: 47
+    OMP_NUM_THREADS=4 ./sum 2048
+    Using 4 threads in parallel sections.
+    Time: 54
+    OMP_NUM_THREADS=4 ./sum 4096
+    Using 4 threads in parallel sections.
+    Time: 56
+    OMP_NUM_THREADS=4 ./sum 8192
+    Using 4 threads in parallel sections.
+    Time: 67
+    OMP_NUM_THREADS=6 ./sum 1024
+    Using 6 threads in parallel sections.
+    Time: 64
+    OMP_NUM_THREADS=6 ./sum 2048
+    Using 6 threads in parallel sections.
+    Time: 73
+    OMP_NUM_THREADS=6 ./sum 4096
+    Using 6 threads in parallel sections.
+    Time: 82
+    OMP_NUM_THREADS=6 ./sum 8192
+    Using 6 threads in parallel sections.
+    Time: 89
+
+Bei einem Thread verhält sich die Laufzeit fast linear zur Länge des Arrays. Auf
+einem System mit zwei Kernen und zwei Threads können wir die Berechnung für
+große Threads leicht beschleunigen. Bei mehr Threads als Kernen ist der Overhead
+für die Threadverwaltung zu groß, sodass wir unnötig CPU-Zyklen verschwenden und
+das Programm sogar langsamer wird.
 
 #Aufgabe 3.2
