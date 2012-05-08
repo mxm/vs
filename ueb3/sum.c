@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <omp.h>
 #include <sys/time.h>
-#include <unistd.h>
 
 int main(int argc, char *argv[]) {
 
@@ -50,7 +49,8 @@ int main(int argc, char *argv[]) {
     assert(sum == n);
 
     //printf("Sum is: %d\n", sum);
-    printf("Time: %ld\n", stop.tv_usec - start.tv_usec);
+    int micro_secs = stop.tv_usec - start.tv_usec;
+    printf("Time: %d microsec, %d millisec, %d seconds\n", micro_secs, micro_secs/1000, micro_secs/1000/1000);
 
     exit(0);
 
