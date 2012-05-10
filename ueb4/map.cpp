@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <map>
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {
     size_t start_pos = 0;
@@ -12,13 +13,12 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
     }
 }
 
-void map(std::string filename) {
-#ifdef DEBUG
-    std::cout << "Filename is: " << filename << std::endl;
-#endif
+std::map<std::string, int> map(std::string filename) {
 
     std::string word;
     std::string line;
+
+    std::map<std::string, int> wordcounts;
 
     std::ifstream input(filename.c_str());
 
@@ -52,21 +52,21 @@ void map(std::string filename) {
 
             //get words, split by whitespaces
             while (getline(linestream, word, ' ')) {
-#ifdef DEBUG
-                std::cout << word << std::endl;
-#endif
+                ++wordcounts[word];
             }
         }
+    } else {
+        //TODO some error handling?
     }
+
+    return wordcounts;
 }
 
-
-//Vector<Map<String, Int>> map(String filename) {
-//
-//
-//}
-
 int main() {
-    map("sample.txt");
+    std::map<std::string, int> result = map("sample.txt");
+    std::map<std::string, int>::iterator end = result.end();
+    for(std::map<std::string, int>::iterator iter = result.begin(); iter != end; ++iter) {
+        std::cout << iter->first << ": " << iter->second << std::endl;
+    }
     return 0;
 }
