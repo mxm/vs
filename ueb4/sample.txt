@@ -1,0 +1,3 @@
+Dies ist ein Satz mit Punkt.
+Dies ist ein Satz ohne Punkt
+Dies ist ein Satz ohne Sinn
