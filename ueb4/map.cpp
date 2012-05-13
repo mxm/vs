@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <map>
 
+#include "map.hpp"
+
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {
     size_t start_pos = 0;
     while((start_pos = str.find(from, start_pos)) != std::string::npos) {
@@ -107,6 +109,7 @@ void printmap(std::map<std::string, int> map) {
     }
 }
 
+#ifdef DEBUG
 int main(int argc, char* argv[]) {
     //test of map function
     printmap(map("sample.txt"));
@@ -117,3 +120,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+#endif

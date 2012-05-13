@@ -1,6 +1,5 @@
 compile:
-	mpicxx map.cpp -o map
-	mpicxx main.cpp -o main
+	mpicxx main.cpp map.cpp -o main
 
 clean:
 	rm map main
