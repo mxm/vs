@@ -62,11 +62,25 @@ std::map<std::string, int> map(std::string filename) {
     return wordcounts;
 }
 
-int main() {
-    std::map<std::string, int> result = map("sample.txt");
-    std::map<std::string, int>::iterator end = result.end();
-    for(std::map<std::string, int>::iterator iter = result.begin(); iter != end; ++iter) {
-        std::cout << iter->first << ": " << iter->second << std::endl;
+std::string mapserialize(std::map<std::string, int> map) {
+
+    std::stringstream result;
+
+    std::map<std::string, int>::iterator end = map.end();
+    for(std::map<std::string, int>::iterator iter = map.begin(); iter != end; ++iter) {
+        result << iter->first << ":" << iter->second << std::endl;
     }
+
+    return result.str();
+}
+
+std::map<std::string, int> map) {}
+
+int main(int argc, char* argv[]) {
+    //test of map function
+    std::cout << mapserialize(map("sample.txt"));
+
+
+
     return 0;
 }
