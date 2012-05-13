@@ -54,7 +54,9 @@ std::map<std::string, int> map(std::string filename) {
 
             //get words, split by whitespaces
             while(getline(linestream, word, ' ')) {
-                ++wordcounts[word];
+                if(word != "") {
+                    ++wordcounts[word];
+                }
             }
         }
     } else {
