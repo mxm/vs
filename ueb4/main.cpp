@@ -1,8 +1,11 @@
 #include <mpi.h>
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <vector>
 #include <string>
 #include <map>
+#include <stdlib.h> //malloc
 
 #include "map.hpp"
 
@@ -27,13 +30,13 @@ void mergemaps(std::map<std::string, int>& result, std::map<std::string, int> ma
 
 int main(int argc, char* argv[]) {
 
-	MPI_Init(&argc, &argv);
+    MPI_Init(&argc, &argv);
 
     int numprocs;
     int processid;
 
-	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &processid);
+    MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &processid);
 
 #ifdef DEBUG
     std::cout << "Process ID is: " << processid << std::endl;
@@ -85,23 +88,56 @@ int main(int argc, char* argv[]) {
     //what happens if number of files is smaller then process number?
     //do not communicate with all process?
 
-    for(i=0; i < numprocs; ++i) {
-#ifdef DEBUG
-        std::cout << mapserialize(remoteresults[i]) << std::endl;
-#endif
+    std::map<std::string, int> reduceresults;
+
+    for(i = 0; i < numprocs; ++i) {
         if(i == processid) {
             //do not send data to yourself
             //merge with reduce results ;)
+            mergemaps(reduceresults, remoteresults[i]);
         } else {
+            //std::cout << "Process " << processid << " sends " << mapserialize(remoteresults[i]) << " to " << i << std::endl;
             //MPI_send to n-1 process
             //send a string that represents the map for process x
+            std::string payload = mapserialize(remoteresults[i]);
+            //std::cout << "Sending: " << payload.c_str() << std::endl;
+            MPI_Send((void *)(payload.c_str()), strlen(payload.c_str())+1, MPI_CHAR, i, 1, MPI_COMM_WORLD);
         }
     }
 
-    //receive n-1 serialized maps from n-1 other process
-    //empty string equals no data?
+    //recv from n-1 process
+    for(i = 0; i < numprocs; ++i) {
+        if(i == processid) {
 
-	MPI_Finalize();
+        } else {
+            //TODO this is insane shit... simplify this!
+            int count;
+            MPI_Status status;
+            MPI_Probe(i, 1, MPI_COMM_WORLD, &status);
+            MPI_Get_count(&status, MPI_CHAR, &count);
+            char* buffer = (char*) malloc(sizeof(char) * count); //is this c++ style?
+            //std::cout << "Recieved: " << count << std::endl;
+            MPI_Recv(buffer, count, MPI_CHAR, i, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            if(std::string(buffer) != "") {
+                mergemaps(reduceresults, mapdeserialize(std::string(buffer)));
+            }
+        }
+    }
 
-	return 0;
+    //write data to files
+    std::stringstream ss;
+    ss << "./data/" << processid;
+
+    std::ofstream reducefile(ss.str().c_str());
+
+    std::map<std::string, int>::iterator end4 = reduceresults.end();
+    for(std::map<std::string, int>::iterator iter = reduceresults.begin(); iter != end4; ++iter) {
+        reducefile << iter->first << ":" << iter->second << std::endl;
+    }
+
+    reducefile.close();
+
+    MPI_Finalize();
+
+    return 0;
 }
