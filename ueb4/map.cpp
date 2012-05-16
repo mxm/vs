@@ -7,6 +7,7 @@
 
 #include "map.hpp"
 
+//stolen from stackoverflow
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {
     size_t start_pos = 0;
     while((start_pos = str.find(from, start_pos)) != std::string::npos) {
@@ -15,6 +16,7 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
     }
 }
 
+//do a word count on a local file
 std::map<std::string, int> map(std::string filename) {
 
     std::string word;
@@ -66,6 +68,9 @@ std::map<std::string, int> map(std::string filename) {
     return wordcounts;
 }
 
+//serialize a map with words
+//seperate word and count by ":"
+//seperate tuples by white space
 std::string mapserialize(std::map<std::string, int> map) {
 
     std::stringstream result;
@@ -78,7 +83,7 @@ std::string mapserialize(std::map<std::string, int> map) {
     return result.str();
 }
 
-//function to deserialize a map (string)
+//function to deserialize a map given as string
 std::map<std::string, int> mapdeserialize(std::string serializedmap) {
 
     std::string tuple;
@@ -94,9 +99,10 @@ std::map<std::string, int> mapdeserialize(std::string serializedmap) {
 
         //find key-value delimiter
         //reconstruct word and wordcount
+        //TODO maybe use strtok instead
         position = tuple.find(":");
-        word = tuple.substr(0,position);
-        count = atoi(tuple.substr(position+1, tuple.length()).c_str());
+        word = tuple.substr(0,position); //get word
+        count = atoi(tuple.substr(position+1, tuple.length()).c_str()); //get word count
         map[word] = count; //feed data into result map
     }
 
