@@ -3,6 +3,7 @@ compile:
 
 clean:
 	rm map main
+	rm data/*
 
 test:
 	mpicxx map.cpp -o map -DDEBUG
