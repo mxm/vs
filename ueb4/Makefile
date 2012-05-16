@@ -13,3 +13,5 @@ test:
 
 run:
 	mpirun -n 2 main sample.txt sample.txt sample.txt
+	ls -lh data
+	cat data/*
