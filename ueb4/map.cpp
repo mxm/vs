@@ -37,7 +37,6 @@ std::map<std::string, int> map(std::string filename) {
             replaceAll(line, ".", " ");
             replaceAll(line, ",", " ");
             replaceAll(line, ";", " ");
-            replaceAll(line, ";", " ");
             replaceAll(line, ":", " ");
             replaceAll(line, "-", " ");
             replaceAll(line, "+", " ");
@@ -48,6 +47,17 @@ std::map<std::string, int> map(std::string filename) {
             replaceAll(line, ")", " ");
             replaceAll(line, "[", " ");
             replaceAll(line, "]", " ");
+            //replace numbers
+            replaceAll(line, "0", " ");
+            replaceAll(line, "1", " ");
+            replaceAll(line, "2", " ");
+            replaceAll(line, "3", " ");
+            replaceAll(line, "4", " ");
+            replaceAll(line, "5", " ");
+            replaceAll(line, "6", " ");
+            replaceAll(line, "7", " ");
+            replaceAll(line, "8", " ");
+            replaceAll(line, "9", " ");
 
             //be case insensetive
             std::transform(line.begin(), line.end(), line.begin(), ::tolower);
