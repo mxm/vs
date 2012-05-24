@@ -2,8 +2,9 @@ compile:
 	mpicxx main.cpp map.cpp -o main
 
 clean:
-	rm map main
-	rm data/*
+	rm -r data
+	mkdir data
+	rm main
 
 test:
 	mpicxx map.cpp -o map -DDEBUG
@@ -13,5 +14,10 @@ test:
 
 run:
 	mpirun -n 2 main sample.txt sample.txt sample.txt
+	ls -lh data
+	cat data/*
+
+run8:
+	mpirun -n 2 main sample.txt sample.txt sample.txt sample.txt sample.txt sample.txt sample.txt sample.txt
 	ls -lh data
 	cat data/*

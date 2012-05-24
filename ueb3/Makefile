@@ -24,8 +24,8 @@ run:
 	OMP_NUM_THREADS=6 ./sum 8192
 
 fibrun:
-	./fib 0
-	./fib 1
-	./fib 2
-	./fib 3
-	./fib 42
+	./fib 0 4
+	./fib 1 4
+	./fib 2 4
+	./fib 3 4
+	./fib 42 4

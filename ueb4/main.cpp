@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
     //map step
     //do map and merge local map results
     for(std::vector<std::string>::iterator iter = files.begin(); iter != end; ++iter) {
-        mergemaps(localresult, map(*iter));
+        mergemaps(localresult, mymap(*iter));
     }
 
     //initialize array for data that belongs to remote processes

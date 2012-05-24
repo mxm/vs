@@ -17,7 +17,7 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
 }
 
 //do a word count on a local file
-std::map<std::string, int> map(std::string filename) {
+std::map<std::string, int> mymap(std::string filename) {
 
     std::string word;
     std::string line;
@@ -130,11 +130,11 @@ void printmap(std::map<std::string, int> map) {
 #ifdef DEBUG
 int main(int argc, char* argv[]) {
     //test of map function
-    printmap(map("sample.txt"));
+    printmap(mymap("sample.txt"));
     std::cout << "########################" << std::endl;
-    std::cout << mapserialize(map("sample.txt")) << std::endl;
+    std::cout << mapserialize(mymap("sample.txt")) << std::endl;
     std::cout << "########################" << std::endl;
-    printmap(mapdeserialize(mapserialize(map("sample.txt"))));
+    printmap(mapdeserialize(mapserialize(mymap("sample.txt"))));
 
     return 0;
 }

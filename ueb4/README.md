@@ -30,4 +30,5 @@ verwendet werden sollte. Gehen wir davon aus, dass ein Word-Count nur einmal
 ausgeführt wird, ist es unerheblich, ob wir eine Hash-Funktion benutzen oder nicht.
 Werden mehrere Word-Counts gleichzeitig ausgeführt, könnte ein Hashing der Dateinamen
 für eine gleichmäßigere Auslastung der einzelnen Prozesse sorgen. Die Größe der Dateien
-ist jedoch der eigentliche Faktor für die Berechnungszeit, das Problem nicht wirklich löst.
+ist jedoch der eigentliche Faktor für die Berechnungszeit. Dieses Problem wird durch das
+Hashen der Dateinamen nicht gelöst.
