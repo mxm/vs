@@ -33,15 +33,49 @@ loop(#state{neighbours=Pids}=State) ->
             io:format("State is: ~p~n", [State]),
             loop(State);
         {marker, _Pid} ->
-            loop(State);
+            snapshot_loop_init(State); %% received the first marker
         _ -> loop(State)
     end.
 
+
+snapshot_loop_init(#state{neighbours=Pids}=State) ->
+    Snapshot = State, %% record internal process state
+    lists:foreach(fun send_marker/1, Pids), %% send one marker M over channel i
+    %%snapshot_loop(Snapshot, [], State),
+    ok.
+
+%% use a prop list to record messages received from a process
+%% if we receive a marker on a channel stop recording
+%% add Messages for channel to finial snapshot ??
+-record(snapshot, {processstate = state, messagerecords = []}).
+
+snapshot_loop(#snapshot{processstate=Snapshot, messagerecords=Records}, Messages, State) ->
+    receive
+        {marker, Pid} ->
+            %% stop recording for channel
+            Records2 = [lists:get_all_values(Pid, Messages)|Records],
+            Messages2 = lists:delete(Pid, Messages),
+            snapshot_loop(#snapshot{processstate=Snapshot, messagerecords=Records2}, Messages2, State);
+        {Message, Pid} ->
+            %% record message for process
+            case lists:is_defined(Pid, Messages) of
+                true ->
+                    snapshot_loop(Snapshot, [Message|Messages], State);
+                false ->
+                    snapshot_loop(Snapshot, Messages, State)
+            end
+    end.
+
+
+
+
+%% send a ping message to a process
 ping(Destination) ->
     Destination ! {ping, self()}.
 
-marker_loop(_State) ->
-    ok.
+%% send a marker to a process
+send_marker(Destination) ->
+    Destination ! {marker, self()}.
 
 test() ->
     {ok, P1} = birth(),
