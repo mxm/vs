@@ -1,0 +1,50 @@
+\documentclass[a4paper,9pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{ngerman}
+\usepackage{fancyhdr}
+\usepackage{color}
+
+\renewcommand\thesubsection{\thesection.\alph{subsection}}
+
+\pagestyle{fancy}
+
+\setlength{\headheight}{60pt}
+\lhead[]{\Large{\textbf{Verteilte Systeme 2012: 6. \"Ubungszettel}} \\
+\quad \\ \large{Schintke, Sch\"utt\\ 07.06.2012 }}
+\rhead[]{\large{Max Michels \\ Philipp Borgers \\ Sascha Sch\"onfeld}}
+
+\begin{document}
+
+\section{Konsistenzmodell f\"ur einen Aktienhandel}
+F\"ur einen Aktienhandel sollte kausale Konsistenz verwendet werden. Die wichtigste Voraussetzung f\"ur einen Aktienhandel ist, dass die \"Anderungen der Werte (Aktienpreise) stets konsistent sind, die auch kausal voneinander abh\"angen. Wert\"anderungen, die voneinander unabh\"angig sind, sind nicht relevant f\"ur die einzelne Aktie. 
+
+\section{Konsistenzmodelle}
+\subsection{}
+Zeigen sie, dass der folgende Verlauf nicht kausal konsistent ist:
+
+\begin{tabbing}
+$P_{1}$: \= W(a)0 \= \quad \= W(a)1 \\
+$P_{2}$: \> R(a)1 \> \quad \> W(b)2 \\
+$P_{3}$: \> R(b)2 \> \quad \> R(a)0
+\end{tabbing}
+
+Der Verlauf ist nicht kausal konsistent, da $P_{2}$ a = 1 liest, bevor $P_{3}$ a = 0 liest. Die Bedingung f\"ur kausale Konsistenz sagt aus, dass Schreiboperationen, die in Kausalit\"at stehen (Was f\"ur die beiden Operationen in $P_{1}$ zutrifft, da sie die selbe Variable beschreiben), von allen Prozessen in genau der Reihenfolge gesehen werden m\"ussen, in der sie ausgef\"uhrt wurden.
+
+\subsection{}
+Ist der Speicher, der der folgenden Ausf\"uhrung zugrundeliegt, sequentiell konsistent (vorausgesetzt, alle Variablen sind zun\"achst auf Null gesetzt)?
+
+\begin{tabbing}
+$P_{1}$: \= R(x)1 \= \quad \= R(x)2 \= \quad \= W(y)1 \\
+$P_{2}$: \> W(x)1 \> \quad \> R(y)1 \> \quad \> W(x)2
+\end{tabbing}
+
+Der Speicher ist nicht sequentiell konsistent. Bei den jeweils zweiten Anweisungen gibt es bereits Probleme: \newline
+W(x)1 $\rightarrow$ R(x)1 $\rightarrow$ \textcolor{red}{R(x)2} ist nicht korrekt, da x = 1. \newline
+W(x)1 $\rightarrow$ R(x)1 $\rightarrow$ \textcolor{red}{R(y)1} ist ebenfalls falsch, da y noch nicht initialisiert wurde.
+
+\subsection{}
+Welchen Konsistenzmodellen entspricht b) ggf. zus\"atzlich? \newline
+Die Reihenfolge entspricht lediglich der FIFO-Konsistenz.
+
+\end{document}
