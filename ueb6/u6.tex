@@ -1,4 +1,5 @@
 \documentclass[a4paper,9pt]{article}
+\usepackage[margin=1in]{geometry}
 
 \usepackage[utf8]{inputenc}
 \usepackage{ngerman}
@@ -47,4 +48,78 @@ W(x)1 $\rightarrow$ R(x)1 $\rightarrow$ \textcolor{red}{R(y)1} ist ebenfalls fal
 Welchen Konsistenzmodellen entspricht b) ggf. zus\"atzlich? \newline
 Die Reihenfolge entspricht lediglich der FIFO-Konsistenz.
 
+\pagebreak{}
+\section{}
+\subsection{Code}
+
+Wir haben lediglich einen Multicast in Erlang implementiert. Für die Umsetzung des Best-Effort-Mulicasts mit kausaler Ordnung fehlte uns wegen wenig Praxis in Erlang die nötige Vorstellungskraft, um das Verstandene in Code zu gießen.
+Zunächst werden fünf Prozesse gestartet, die fortwährend die loop-Funktion ausführen. Die Loop-Funktion wartet auf Nachrichten verschiedene Art: eine join-Nachricht, die das Beitreten einer Gruppe ermöglicht, eine mutlicast-Nachricht zum Senden von Nachrichten an alle Gruppenmitglieder und eine Nachricht zum Ausgeben der empfangegenen Nachrichten.
+
+\begin{verbatim}
+-module(multicast).
+
+-compile(export_all).
+
+
+test() ->
+    P1 = start(),
+    P2 = start(),
+    P3 = start(),
+    P4 = start(),
+    P5 = start(),
+    Group = [P1, P2, P3, P4, P5],
+    P1 ! {join, Group},
+    P1 ! {multicast, "This is a message"},
+    Group.
+
+start() ->
+    Pid = spawn(multicast, loop, [{0, 0, []}]),
+    Pid.    
+
+loop({S, R, Group}=State) ->
+    receive
+        {join, Members} ->
+            io:format("Process ~p joined group ~p~n", [self(), Members]),
+            loop({S, R, Members});
+        %% start a multicast message
+        {multicast, Message} ->
+            io:format("Received multicast init message ~p~n", [Message]),
+            io:format("Sending multicast message to group ~p~n", [Group]),
+            % send message to each member of the group
+            Fun = fun (Pid) ->
+                    Pid ! {msg, self(), S, Message}
+            end,
+            lists:foreach(Fun, Group),
+            %% increase seq. number
+            loop({S+1, R, Group});
+        {msg, Src, S2, Message} ->
+            io:format("Process ~p received Message ~p~n", [self(), {Src, S2, Message}]),
+            loop(State);
+        X ->
+            io:format("Fail...~p~n",[X]),
+            loop(State)
+    end.
+\end{verbatim}
+\pagebreak{}
+
+\subsection{Testlauf}
+
+\begin{verbatim}
+Eshell V5.8  (abort with ^G)
+1> c(multicast).
+{ok,multicast}
+2> multicast:test().
+Process <0.39.0> joined group [<0.39.0>,<0.40.0>,<0.41.0>,<0.42.0>,<0.43.0>]
+[<0.39.0>,<0.40.0>,<0.41.0>,<0.42.0>,<0.43.0>]
+Received multicast init message "This is a message"
+Sending multicast message to group [<0.39.0>,<0.40.0>,<0.41.0>,<0.42.0>,
+                                    <0.43.0>]
+Process <0.39.0> received Message {<0.39.0>,0,"This is a message"}
+Process <0.40.0> received Message {<0.39.0>,0,"This is a message"}
+Process <0.41.0> received Message {<0.39.0>,0,"This is a message"}
+Process <0.42.0> received Message {<0.39.0>,0,"This is a message"}
+Process <0.43.0> received Message {<0.39.0>,0,"This is a message"}
+\end{verbatim}
+
 \end{document}
+
