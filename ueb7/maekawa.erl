@@ -4,7 +4,8 @@
 %% feel free to adjust the init function
 
 init() ->
-    P1 = spawn(maekawa, initProc, []),
+	%%6 processes and 3 groups
+	P1 = spawn(maekawa, initProc, []),
 	P2 = spawn(maekawa, initProc, []),
 	P3 = spawn(maekawa, initProc, []),
 	P4 = spawn(maekawa, initProc, []),

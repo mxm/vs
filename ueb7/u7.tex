@@ -1,0 +1,87 @@
+\documentclass[a4paper,9pt]{article}
+\usepackage[margin=1in]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage{color}
+\usepackage{listings}
+
+\lstset{
+	tabsize=4,
+	numbers=left,
+	language=Erlang,
+	basicstyle=\footnotesize
+}
+
+\renewcommand\thesubsection{\thesection.\alph{subsection}}
+
+\pagestyle{fancy}
+
+\setlength{\headheight}{60pt}
+\lhead[]{\Large{\textbf{Verteilte Systeme 2012: 7. \"Ubungszettel}} \\
+\quad \\ \large{Schintke, Sch\"utt\\ 21.06.2012 }}
+\rhead[]{\large{Max Michels \\ Philipp Borgers \\ Sascha Sch\"onfeld}}
+
+\begin{document}
+
+\section{Maekawa-Algorithmus in Erlang}
+\subsection{Code}
+
+\lstinputlisting{maekawa.erl}
+
+\vspace{2cm}
+\subsection{Erläuterung}
+Wir haben den Maekawa-Algorithmus für eine flexible Anzahl von Prozessen implementiert. In der Funktion init() können beliebig viele Prozesse gespawnt werden. Damit der wechselseitige Ausschluss zwischen den Prozessen funktioniert, muss jedem Prozess eine Prozessgruppe zugeordnet werden. Dies kann nach der Initialisierung des Prozesses mit eine Nachricht {setGroup, GROUP} an den jeweiligen Prozess erfolgen. Anschließend können Prozesse mit einer Nachricht der Form enterCriticalSection in den kritischen Bereich geschickt werden. Der kritische Bereich wird von der Funktion criticalSection() simuliert.
+Der Maekawa-Algorithmus stellt in der Funktion loop() sicher, dass stets nur ein Prozess im kritischen Bereich landet. Das heißt, dass wenn ein Prozess den Zustand held hat, die anderen Prozesse warten müssen und entsprechende Anfragen gebuffert werden. Für einen Prozess gibt es drei Zustände, in dem er sein kann. Entweder ist ein prozess in der kritischen Sektion (held), oder er wartet auf eine Freigabe (wanted), oder aber er befindet sich im normalen Ablauf (released). Im Zustand held und wanted werden stets Nachrichten abgeareitet, wohingegen im held Zustand nicht. Der eigentliche Algorithmus sieht auch im Held Zustand eine Abarbeitung der Nachrichten vor, jedoch führt unsere Variante auch zum wechselsetitigen Ausschluss.
+
+\pagebreak{}
+\subsection{Testlauf}
+
+\begin{verbatim}
+maekawa:init().
+initializing <0.156.0> with [<0.156.0>,<0.157.0>,<0.158.0>]
+initializing <0.157.0> with [<0.157.0>,<0.159.0>,<0.160.0>]
+initializing <0.158.0> with [<0.156.0>,<0.157.0>,<0.158.0>]
+initializing <0.159.0> with [<0.157.0>,<0.159.0>,<0.160.0>]
+initializing <0.160.0> with [<0.160.0>,<0.161.0>,<0.156.0>]
+initializing <0.161.0> with [<0.160.0>,<0.161.0>,<0.156.0>]
+'initialization done'
+<0.156.0>: trying to enter critical section
+<0.158.0>: trying to enter critical section
+<0.158.0>: sent out requests to group 
+<0.161.0>: trying to enter critical section
+<0.156.0>: sent out requests to group 
+<0.157.0>: Sending reply to <0.158.0>
+<0.158.0>: Sending reply to <0.158.0>
+<0.158.0>: queuing request from <0.156.0>
+<0.161.0>: sent out requests to group 
+<0.158.0>: Received reply number 1
+<0.156.0>: Sending reply to <0.158.0>
+<0.157.0>: queuing request from <0.156.0>
+<0.158.0>: Received reply number 2
+<0.160.0>: Sending reply to <0.161.0>
+<0.161.0>: Sending reply to <0.161.0>
+<0.156.0>: queuing request from <0.156.0>
+<0.158.0>: Received reply number 3
+<0.158.0>: I'm in the critical section. Hope noone's around...
+<0.156.0>: queuing request from <0.161.0>
+<0.161.0>: Received reply number 1
+<0.161.0>: Received reply number 2
+<0.158.0>: I'm leaving the critical section
+<0.158.0>: Sending reply to <0.156.0>
+<0.156.0>: Sending reply to <0.156.0>
+<0.156.0>: Received reply number 1
+<0.156.0>: Received reply number 2
+<0.157.0>: Sending reply to <0.156.0>
+<0.156.0>: Received reply number 3
+<0.156.0>: I'm in the critical section. Hope noone's around...
+<0.156.0>: I'm leaving the critical section
+<0.156.0>: Sending reply to <0.161.0>
+<0.161.0>: Received reply number 3
+<0.161.0>: I'm in the critical section. Hope noone's around...
+<0.161.0>: I'm leaving the critical section
+
+\end{verbatim}
+
+\end{document}
+
