@@ -1,11 +1,12 @@
 \documentclass[a4paper,9pt]{article}
 \usepackage[margin=1in]{geometry}
-
+\usepackage{setspace}
 \usepackage[utf8]{inputenc}
 \usepackage{fancyhdr}
 \usepackage{color}
 \usepackage{listings}
 
+\onehalfspacing
 \lstset{
 	tabsize=4,
 	numbers=left,
@@ -32,6 +33,7 @@
 \vspace{2cm}
 \subsection{Erläuterung}
 Wir haben den Maekawa-Algorithmus für eine flexible Anzahl von Prozessen implementiert. In der Funktion init() können beliebig viele Prozesse gespawnt werden. Damit der wechselseitige Ausschluss zwischen den Prozessen funktioniert, muss jedem Prozess eine Prozessgruppe zugeordnet werden. Dies kann nach der Initialisierung des Prozesses mit eine Nachricht {setGroup, GROUP} an den jeweiligen Prozess erfolgen. Anschließend können Prozesse mit einer Nachricht der Form enterCriticalSection in den kritischen Bereich geschickt werden. Der kritische Bereich wird von der Funktion criticalSection() simuliert.
+
 Der Maekawa-Algorithmus stellt in der Funktion loop() sicher, dass stets nur ein Prozess im kritischen Bereich landet. Das heißt, dass wenn ein Prozess den Zustand held hat, die anderen Prozesse warten müssen und entsprechende Anfragen gebuffert werden. Für einen Prozess gibt es drei Zustände, in dem er sein kann. Entweder ist ein prozess in der kritischen Sektion (held), oder er wartet auf eine Freigabe (wanted), oder aber er befindet sich im normalen Ablauf (released). Im Zustand held und wanted werden stets Nachrichten abgeareitet, wohingegen im held Zustand nicht. Der eigentliche Algorithmus sieht auch im Held Zustand eine Abarbeitung der Nachrichten vor, jedoch führt unsere Variante auch zum wechselsetitigen Ausschluss.
 
 \pagebreak{}
