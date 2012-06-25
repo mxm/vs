@@ -1,0 +1,33 @@
+\documentclass[a4paper,9pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ngerman}
+\usepackage{fancyhdr}
+
+
+\pagestyle{fancy}
+
+\setlength{\headheight}{60pt}
+\lhead[]{\Large{\textbf{Verteilte Systeme 2012: 8. \"Ubungszettel}} \\
+\quad \\ \large{Schintke, Sch\"utt\\ 28.06.2012 }}
+\rhead[]{\large{Max Michels \\ Philipp Borgers \\ Sascha Sch\"onfeld}}
+
+\begin{document}
+
+\section{Wahlalgorithmus Chang-Roberts}
+Die Variable participant wird genutzt um zu zeigen, dass ein Prozess bei der Wahl eines Leaders partizipiert. Sie wird allerdings nur genau einmal gepr\"uft, wenn $p_{i}$ eine h\"ohere ID hat als der Prozess, der aktuell in der election-Nachricht enthalten ist. \\
+Die Pr\"ufung ist allerdings unn\"otig, da die Variable nur auf true gesetzt wird, wenn der Prozess
+\begin{itemize}
+\item die Wahl iniziiert hat, oder
+\item eine kleinere ID als der in der Nachricht referenzierte Prozess besitzt.
+\end{itemize}
+Egal welcher der beiden obigen Punkte zutrifft, bei Erhalt der Nachricht \\
+<election, j> geht $P_{i}$ nicht in den else if-Teil der Verzweigung. Daher kann die Pr\"ufung entfallen. Da dies die einzige Pr\"ufung auf participant ist, kann die Variable komplett weggelassen werden.
+
+\section{Bully-Algorithmus}
+Wenn n die Anzahl an Prozessen ist, muss die Mindestwartezeit T' f\"ur $P_{i}$ mindestens wie folgt aussehen: \\
+$T' = (2 \cdot T_{trans} \cdot (n-i))$ \\
+Der Prozess muss mindestens so lange warten, dass alle anderen Prozesse den Algorithmus ebenfalls durchlaufen k\"onnen. Gibt es Prozesse mit h\"oheren IDs, so m\"ussen diese die M\"oglichkeit bekommen, ihre Nachrichten abzusetzen und sich schlussendlich als Koordinator bekanntzugeben.
+
+\end{document}
