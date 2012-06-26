@@ -27,7 +27,11 @@ Egal welcher der beiden obigen Punkte zutrifft, bei Erhalt der Nachricht \\
 
 \section{Bully-Algorithmus}
 Wenn n die Anzahl an Prozessen ist, muss die Mindestwartezeit T' f\"ur $P_{i}$ mindestens wie folgt aussehen: \\
-$T' = (2 \cdot T_{trans} \cdot (n-i))$ \\
+$T' = 2 \cdot T_{trans} \cdot (n-i)$ \\
 Der Prozess muss mindestens so lange warten, dass alle anderen Prozesse den Algorithmus ebenfalls durchlaufen k\"onnen. Gibt es Prozesse mit h\"oheren IDs, so m\"ussen diese die M\"oglichkeit bekommen, ihre Nachrichten abzusetzen und sich schlussendlich als Koordinator bekanntzugeben.
+
+\section{Echo-Algorithmus}
+\subsection{}
+Der Echo Algorithmus auf Wikipedia arbeitet mit gef\"arbten Marken, um zwischen explore und echo-Nachrichten zu unterscheiden. Diese sind an sich nicht zwingend notwendig, da jeder Knoten einen Z\"ahler hat. Dieser z\"ahlt, wie viele Nachrichten (egal ob explore oder echo) er von seinen Nachbarn bekommen hat.Da die Anzahl an Nachbarn bekannt ist und er dann ebenfalls eine Nachricht an den Prozess sendet, von dem er zuerst eine Nachricht bekam (father im Vorlesungsalgorithmus), sind die Marken nicht notwendig.
 
 \end{document}
