@@ -32,6 +32,14 @@ Der Prozess muss mindestens so lange warten, dass alle anderen Prozesse den Algo
 
 \section{Echo-Algorithmus}
 \subsection{}
-Der Echo Algorithmus auf Wikipedia arbeitet mit gef\"arbten Marken, um zwischen explore und echo-Nachrichten zu unterscheiden. Diese sind an sich nicht zwingend notwendig, da jeder Knoten einen Z\"ahler hat. Dieser z\"ahlt, wie viele Nachrichten (egal ob explore oder echo) er von seinen Nachbarn bekommen hat.Da die Anzahl an Nachbarn bekannt ist und er dann ebenfalls eine Nachricht an den Prozess sendet, von dem er zuerst eine Nachricht bekam (father im Vorlesungsalgorithmus), sind die Marken nicht notwendig.
+Der Echo Algorithmus auf Wikipedia arbeitet mit gef\"arbten Marken, um zwischen explore und echo-Nachrichten zu unterscheiden. Diese sind an sich nicht zwingend notwendig, da jeder Knoten einen Z\"ahler hat. Dieser z\"ahlt, wie viele Nachrichten (egal ob explore oder echo) er von seinen Nachbarn bekommen hat.Da die Anzahl an Nachbarn bekannt ist und er dann ebenfalls eine Nachricht an den Prozess sendet, von dem er zuerst eine Nachricht bekam (father im Vorlesungsalgorithmus), sind die Marken nicht notwendig. \\
+Der gr\"o"ste Unterschied zwischen dem Algorithmus auf Wikipedia und dem aus den Folien besteht darin, dass im Foliensatz der Initiator immer der Wurzelknoten ist, w\"ahrend beim Wikipedia-Algorithmus ein Knoten an beliebiger Stelle den Algorithmus iniziieren kann. \\
+Es gibt im Foliensatz au"serdem nur eine Art Nachricht, w\"ahrend der Wikipedia-Algorithmus zwischen explore- und echo-Nachrichten unterscheidet. Hierbei entsprechen die Echo-Nachrichten in der Regel den Nachrichten, die beim Vorlesungsalgorithmus von einem Knoten an seinen Vaterknoten gesendet werden, sobald er Nachrichten von allen anderen benachbarten Knoten erhalten hat.
+
+\subsection{}
+Prozesse, die bereits alle Nachrichten erhalten und das Token an den father-Knoten gesendet haben, d\"urfen ausfallen, da ihre Informationen bereits versendet wurden. F\"allt ein Prozess aber aus, w\"ahrend der Algorithmus noch l\"auft, wartet der father-Prozess unendlich lange auf die Antwort des darunterliegenden Prozesses. \\
+Nachdem der Prozess gestartet und alle ausgehenden Nachrichten versendet wurden, kann auch der Initiator der Welle ausfallen, da die darunterliegenden Prozesse dennoch alle Nachrichten bek\"amen.
+
+\subsection{}
 
 \end{document}
