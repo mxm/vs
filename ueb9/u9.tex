@@ -1,0 +1,49 @@
+\documentclass[a4paper,9pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ngerman}
+\usepackage{fancyhdr}
+
+
+\pagestyle{fancy}
+
+\setlength{\headheight}{60pt}
+\lhead[]{\Large{\textbf{Verteilte Systeme 2012: 9. \"Ubungszettel}} \\
+\quad \\ \large{Schintke, Sch\"utt\\ 05.07.2012 }}
+\rhead[]{\large{Max Michels \\ Philipp Borgers \\ Sascha Sch\"onfeld}}
+
+\begin{document}
+
+\section{Nebenl\"aufige Transaktionen}
+
+\begin{itemize}
+\item R\"uckw\"artsvalidation: T wird vor U validiert.
+	\begin{itemize}
+	\item T wird validiert, es gibt vorher keine Transaktion. Die Validierung wird passiert.
+	\item U wird validiert, nachdem T geschrieben hat. U hat kein Read-Set und passiert die Validierung.
+	\item \textbf{x = 0; i = 55; j = 66;}
+	\end{itemize}
+\item R\"uckw\"artsvalidation: U wird vor T validiert.
+	\begin{itemize}
+	\item U wird validiert, es gibt vorher keine Transaktion. Die Validierung wird passiert.
+	\item T wird validiert, nachdem U geschrieben hat. Das Read-Set umfasst i, das von U geschrieben wurde. Daher wird T abgebrochen.
+	\item \textbf{x = 0; i = 55; j = 66;}
+	\end{itemize}
+\item Vorw\"artsvalidation: T wird vor U validiert.
+	\begin{itemize}
+	\item T wird gegen U validiert, U hat kein Read-Set. Die Validierung passiert
+	\item Wenn U validiert wird, ist keine andere Transaktion mehr aktiv, auch hier wird die Validierung passiert.
+	\item \textbf{x = 0; i = 55; j = 66;}
+	\end{itemize}
+\item Vorw\"artsvalidation: U wird vor T validiert.
+	\begin{itemize}
+	\item U wird validiert, w\"ahrend T noch in der Arbeitsphase ist. Der Konflikt zu read(i) in T wird erkannt.
+		\begin{itemize}
+		\item [Fall 1:] T wird abgebrochen. \textbf{Ergebnis: x = 0; i = 55; j = 66;}
+		\item [Fall 2:] Die Validierung von U wird verz\"ogert. T wird beendet und validiert, U wird erneut validiert und passiert die Validierung, da keine Transaktion mehr aktiv ist. \textbf{Ergebnis: x = 0; i = 55; j = 66;} (Verh\"alt sich wie "`T wird vor U validiert"')
+		\end{itemize}
+	\item \textbf{x = 0; i = 55; j = 66;}
+	\end{itemize}
+\end{itemize}
+\end{document}
