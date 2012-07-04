@@ -1,11 +1,10 @@
 -module('chang-roberts').
--compile(export_all).
-%-export([init/1, loop/1]).
+-export([init/1, loop/1, test/1]).
 
 init(NumProcs) ->
 	io:format("Spawning processes~n"),
-	init(NumProcs,[]),
-	tests().
+	PIDs = init(NumProcs,[]),
+	test(PIDs).
 
 init(NumProcs, PIDs) when NumProcs > 0 ->
 	PID = spawn('chang-roberts', loop, [{_Participant = false, _Leader = no, _Successor = undefined}]),
@@ -23,19 +22,45 @@ establishCircle(PIDs, ShiftPos) ->
 		_ ->
 			Cur = ShiftPos+1,
 			Suc = (ShiftPos + 1) rem length(PIDs) + 1,
-			io:format("~p -> ~p~n",[lists:nth(Cur,PIDs),lists:nth(Suc,PIDs)]),
-			lists:nth(Cur, PIDs) ! {setSucessor, lists:nth(Suc, PIDs)},
+			lists:nth(Cur, PIDs) ! {setSuccessor, lists:nth(Suc, PIDs)},
 			establishCircle(PIDs, ShiftPos+1)
-	end.
+	end,
+	PIDs.
 
-tests() ->
-	ok.
+test(PIDs) ->
+	lists:nth(1,PIDs) ! startElection.
 
-loop(State) ->
-	{Participant = false, Leader = no, Successor = undefined} = State,
+loop({Participant, Leader, Successor}) ->
+	%{Participant = false, Leader = no, Successor = undefined} = State,
 	NewState = 
 		receive 
 			{setSuccessor, PID} ->
-				{Participant, Leader, PID}				
+				io:format("~p: My successor is now ~p~n",[self(),PID]),
+				{Participant, Leader, PID};
+			startElection ->
+				Successor ! {election, self()},
+				{true, Leader, Successor};
+			{election, PID} ->
+				if
+					PID > self() ->
+						Successor ! {election, PID},
+						{true, Leader, Successor};
+					PID < self() ->
+						if
+							Participant =:= false ->
+								Successor ! {election, self()};
+							true ->
+								'done with algo'
+						end;
+					PID =:= self() ->
+						Successor ! {elected, self()},
+						{false, Leader, Successor}
+				end;
+			{elected, PID} ->
+				if
+					PID =/= self() ->
+						Successor ! {elected, PID}
+				end,
+				{false, _Leader = PID, Successor}
 		end,
 	loop(NewState).
