@@ -1,10 +1,15 @@
 \documentclass[a4paper,9pt]{article}
-
+\usepackage[margin=1in]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{ngerman}
 \usepackage{fancyhdr}
-
+\usepackage{listings}
+\lstset{
+	tabsize=4,
+	numbers=left,
+	language=Erlang,
+	basicstyle=\footnotesize
+}
 
 \pagestyle{fancy}
 
@@ -46,4 +51,88 @@
 	\item \textbf{x = 0; i = 55; j = 66;}
 	\end{itemize}
 \end{itemize}
+
+\pagebreak{}
+\section{Chang-Roberts-Algorithmus}
+\subsection{Code}
+\lstinputlisting{chang-roberts.erl}
+
+\pagebreak{}
+\subsection{Testläufe}
+
+\begin{verbatim}
+> c('chang-roberts').
+> 'chang-roberts':init(8).
+Spawning processes
+Spawned process <0.58.0>
+Spawned process <0.59.0>
+Spawned process <0.60.0>
+Spawned process <0.61.0>
+Spawned process <0.62.0>
+Spawned process <0.63.0>
+Spawned process <0.64.0>
+Spawned process <0.65.0>
+<0.61.0>: My successor is now <0.62.0>
+established circle.
+<0.58.0>: My successor is now <0.59.0>
+<0.59.0>: My successor is now <0.60.0>
+<0.60.0>: My successor is now <0.61.0>
+<0.62.0>: My successor is now <0.63.0>
+<0.63.0>: My successor is now <0.64.0>
+<0.64.0>: My successor is now <0.65.0>
+<0.65.0>: My successor is now <0.58.0>
+ok
+
+
+Testen Sie den Wahlalgorithmus mit verschiedenen Startknoten
+und zahlen Sie die Anzahl der benotigten Nachrichten:
+
+> tester ! test1.
+Starting election with <0.43.0>
+<0.39.0>: Leader found (<0.43.0>)
+<0.40.0>: Leader found (<0.43.0>)
+<0.41.0>: Leader found (<0.43.0>)
+<0.42.0>: Leader found (<0.43.0>)
+Number of messages: 8
+
+
+> tester ! test1.
+Starting election with <0.41.0>
+<0.39.0>: Leader found (<0.43.0>)
+<0.40.0>: Leader found (<0.43.0>)
+<0.41.0>: Leader found (<0.43.0>)
+<0.42.0>: Leader found (<0.43.0>)
+Number of messages: 10
+
+
+> tester ! test1.
+Starting election with <0.42.0>
+<0.39.0>: Leader found (<0.43.0>)
+<0.40.0>: Leader found (<0.43.0>)
+<0.41.0>: Leader found (<0.43.0>)
+<0.42.0>: Leader found (<0.43.0>)
+Number of messages: 9
+
+
+Testen Sie den Wahlalgorithmus mit mehreren nebenlaufigen Starts in verschiedenen Prozessen 
+und zahlen Sie die Anzahl der benotigten Nachrichten.
+
+> tester ! test2.
+Starting election with <0.40.0>
+Starting election with <0.40.0>
+Starting election with <0.40.0>
+<0.40.0>: Leader found (<0.43.0>)
+<0.41.0>: Leader found (<0.43.0>)
+<0.42.0>: Leader found (<0.43.0>)
+<0.39.0>: Leader found (<0.43.0>)
+<0.40.0>: Leader found (<0.43.0>)
+<0.41.0>: Leader found (<0.43.0>)
+<0.42.0>: Leader found (<0.43.0>)
+<0.39.0>: Leader found (<0.43.0>)
+<0.40.0>: Leader found (<0.43.0>)
+<0.41.0>: Leader found (<0.43.0>)
+<0.42.0>: Leader found (<0.43.0>)
+Number of messages: 35
+\end{verbatim}
+
 \end{document}
