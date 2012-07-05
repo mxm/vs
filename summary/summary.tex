@@ -1,0 +1,134 @@
+\documentclass[9pt]{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ngerman}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+
+\pagestyle{fancy}
+
+\setlength{\headheight}{60pt}
+\lhead[]{\Large{\textbf{Verteilte Systeme 2012: Zusammenfassung}} \\}
+
+\begin{document}
+\section{Systemarchitekturen nach Flynn}
+\subsection{SISD (Von-Neumann-Architektur)}
+Single Instruction Single Data \\
+ein Instruktionsstrom und ein Datenstrom \\
+sequentielle Uniprozessorarchitektur, ggf. aber interne Parallelität durch Pipelining oder intelligente I/O-Kanäle
+
+\subsection{SIMD}
+Single Instruction Multiple Data \\
+ein Instruktionsstrom, mehrere Datenströme \\
+Beispiele: Vektorprozessoren, Grafikkarten \\
+Ausblenden einzelner Prozessoren durch Tagging möglich $\leftarrow$ Prozessoren können simultan verschiedene Operationen ausführen
+
+\subsection{MIMD}
+Multiple Instruction Multiple Data \\
+Systeme mit \begin{itemize}
+\item gemeinsamem Speicher ("`shared memory"', SMP)
+\item verteiltem Speicher ("`distributed memory"', DMS)
+\end{itemize}
+Prozessoren werden über Verbindungsnetzwerk gekoppelt, jeder wird über einen unabhängigen Instruktionsstrom gesteuert \\
+Prozessoren arbeiten autonom und haben über Verbindungsnetzwerk Zugriff auf die Daten der anderen Prozessoren 
+
+\subsection{MISD}
+Multiple Instruction Single Data \\
+Eher nicht verwendet, als Beispiel aber FPGA
+
+\section{SPMD - Single Program, Multiple Data}
+\textbf{nicht Teil der Flynn-Taxomonie} \\
+Grundprinzip: Alle (MIMD-)Prozessoren arbeiten auf Kopien desselben Programmcodes, aber mit unterschiedlichen Daten und ggf. in
+unterschiedlichen Modulen. \\
+Vorteile \begin{itemize}
+\item leichte Programmentwicklung, -debugging, -wartung
+\item leichtere Synchronisation als "`echte"' MIMD-Programmierung
+\item gröbere Parallelitätsgranularität als SIMD
+\end{itemize}
+
+\section{Verteilte Systeme allgemein}
+\subsection{Definition}
+Menge miteinander verbundener, autonomer Computer, die dem Nutzer wie ein einzelnes kohärentes System erscheinen.
+\begin{itemize}
+\item "`Computer"': Prozessoren/Prozesse
+\item "`autonom"' : jeder Knoten hat private Kontrolle (kein SIMD)
+\item "`miteinander verbunden"' : Informationsaustausch ist möglich
+\end{itemize}
+
+Typen: \begin{itemize}
+\item Computer in WANs - Internet, Intranet
+\item Computer im LAN - Hausnetz einer Universität
+\item kooperierende Prozesse/Threads - Prozesse und Threads auf einer Maschine
+\end{itemize}
+
+\subsection{Vorteile/Motivation}
+\begin{itemize}
+\item Informationsaustausch
+\item Zuverlässigkeit durch Replikation
+\item Ressourcensharing (Drucker, Festplattenspeicher, Rechenleistung)
+\item Leistungssteigerung durch Parallelisierung
+\item Vereinfachung des Systemdesigns durch Entkopplung/Spezialisierung
+\end{itemize}
+
+\subsection{Anforderungen}
+\begin{itemize}
+\item Transparenz - Verteilung bleibt dem Benutzer verborgen
+\item Offenheit - Austausch und Erweiterbarkeit (von Komponenten)
+\item Skalierbarkeit - gleich gute Leistung unabhängig von der Nutzeranzahl 
+	\begin{itemize}
+	\item Größe - mehr Nutzer und Ressourcen
+	\item geographische Verteilung
+	\item administrativ - über Organisationsgrenzen hinweg administrierbar
+	\end{itemize}
+\end{itemize}
+Realisierung von Transparenz durch Middleware: \\
+\includegraphics[width=80mm]{verteiltesSystemBeispiel.png}
+\section{Parallele Programmierung}
+\subsection{Betriebssystemsicht}
+\begin{itemize}
+\item Multicomputerbetriebssystem: erbringt die Systemdienste verteilt und transparent
+	\begin{itemize}
+	\item präsentiert dem Nutzer ein kohärentes System
+	\item hat vollständige Kontrolle über Knoten und deren Ressourcen
+	\item kann keine heterogenen Systeme verwalten
+	\end{itemize}
+\item Netzwerk-Betriebssystem: erlaubt, Dienste entfernt zu nutzen, bietet aber keine Transparenz
+	\begin{itemize}
+	\item verteilte Rechner mit autonomen Betriebssystemen und eigener Ressourcenverwaltung
+	\item eingebaute Netzwerkfunktionalität
+	\item skalierbar und offen
+	\end{itemize}
+\end{itemize}
+Middleware: \begin{itemize}
+\item bietet Abstraktionen für Netzwerkprogrammierung $\leftarrow$ \textbf{bessere Transparenz}
+\item bietet relativ kompletten Satz von Diensten
+\item Event Handling und Filtering
+\item Auffinden von Ressourcen für mobiles Computing
+\item Unterstützen von Datenströmen
+\end{itemize}
+
+\subsection{Parallele Programmierung}
+Ausgewogenes System: Forderung pro Operation/s:
+\begin{itemize}
+\item 1 Byte Hauptspeicherkapazität
+\item 100 Byte Plattenspeicher
+\item 1 Bit I/O-Rate
+\end{itemize}
+
+Leistungssteigerung durch:
+\begin{itemize}
+\item Pipelining: mehr Instruktionen pro Zeit durch parallel arbeitende Funktionale Einheiten
+\item Superscalar: mehr Instruktionen pro Takt durch duplizierte funktionale Einheiten
+\item Out-of Order Execution: mehr Instruktionen pro Zeiteinheit durch Vermeidung von Pipelinestauungen
+\item Multilevel Caches: mehr Instruktionen pro Zeiteinheit durch Vermeidung von Speicherwartezeiten
+\item SIMD: viele (gleiche) Instruktionen auf einem Datenstrom
+\end{itemize}
+
+\subsection{Speedup}
+\begin{displaymath}
+
+\end{displaymath}
+
+SEITE 14/100 Folie 02
+\end{document}
