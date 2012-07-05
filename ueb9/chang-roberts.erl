@@ -7,12 +7,12 @@ init(NumProcs) ->
 	test(PIDs).
 
 init(NumProcs, PIDs) when NumProcs > 0 ->
-	PID = spawn('chang-roberts', loop, [{_Participant = false, _Leader = no, _Successor = undefined}]),
+	InitState = {_Participant = false, _Leader = no, _Successor = undefined},
+	PID = spawn('chang-roberts', loop, [InitState]),
 	io:format("Spawned process ~p~n",[PID]),
 	init(NumProcs-1, PIDs ++ [PID]);
 
 init(0, PIDs) ->
-	io:format("Spawned all proccesses, will now establish the circle...~n"),
 	establishCircle(PIDs, 0).
 
 establishCircle(PIDs, ShiftPos) ->
@@ -50,17 +50,21 @@ loop({Participant, Leader, Successor}) ->
 							Participant =:= false ->
 								Successor ! {election, self()};
 							true ->
-								'done with algo'
-						end;
-					PID =:= self() ->
+								ok
+						end,
+						{Participant,Leader,Successor};
+					true ->
 						Successor ! {elected, self()},
 						{false, Leader, Successor}
 				end;
 			{elected, PID} ->
 				if
 					PID =/= self() ->
-						Successor ! {elected, PID}
+						Successor ! {elected, PID};
+					true ->
+						ok
 				end,
 				{false, _Leader = PID, Successor}
 		end,
+	io:format("~p: newstate: ~p~n",[self(),NewState]),
 	loop(NewState).
