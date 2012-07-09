@@ -5,6 +5,9 @@
 \usepackage{ngerman}
 \usepackage{fancyhdr}
 \usepackage{graphicx}
+\usepackage{listings}
+\usepackage{nameref}
+\usepackage{hyperref}
 
 \pagestyle{fancy}
 
@@ -12,6 +15,10 @@
 \lhead[]{\Large{\textbf{Verteilte Systeme 2012: Zusammenfassung}} \\}
 
 \begin{document}
+
+\tableofcontents
+\newpage
+
 \section{Systemarchitekturen nach Flynn}
 \subsection{SISD (Von-Neumann-Architektur)}
 Single Instruction Single Data \\
@@ -126,9 +133,1455 @@ Leistungssteigerung durch:
 \end{itemize}
 
 \subsection{Speedup}
-\begin{displaymath}
+$S_{N}(n) = \frac{T_{1}(n)}{T_{N}(n)}$ \\
+n = Problemgröße \\
+N = Anzahl Prozessoren/Knoten \\ \\
 
-\end{displaymath}
+absoluter Speedup: $T_{1}$ = Zeit des optimalen sequentiellen Algorithmus \\
+relativer Speedup: $T_{1}$ = Zeit des paralellen Algorithmus auf einem Prozessor \\
+Normalerweise: $1 \leq S_{N}(n) \leq N$ \\
+Slowdown, falls $S_{N}(n) < 1$ | zB wenn Mehraufwand für Parallelisierung $>$ Gewinn \\
+\subsection{Amdahls Gesetz}
+\begin{tabular}{ll}
+N & Anzahl Prozessoren \\
+P & Anteil des parallelisierbaren Programmcodes \\
+1-P & Anteil des sequentiellen Programmcodes
+\end{tabular}
 
-SEITE 14/100 Folie 02
+$S_{N}(n) \leq \frac{1}{(1-P) + \frac{P}{N}} \leq \frac{1}{(1-P)}$ \\
+Speedup ist limitiert durch sequentiellen Anteil. \\
+\textit{Amdahl-Effekt}: Bei fester Prozessoranzahl steigt die Beschleunigung mit wachsender Problemgröße. \\
+\subsection{Effizienz}
+$E_{N}(n) = \frac{S_{N}(n)}{N}$ \\
+Quotient aus erreichtem und theoretisch maximalem Speedup.
+$\rightarrow E_{N}(n) = \frac{T_{1}(n)}{T_{N}(n) * N}$ \\
+
+\section{Parallele Maschinenmodelle}
+\subsection{PRAM - Parallel Random Access Memory Machine}
+Modelle:
+\begin{itemize}
+\item exclusive read, exclusive write
+	\begin{itemize}
+	\item schwächstes Modell, Speicherverwaltung muss Minimum an Nebenläufigkeit unterstützen
+	\end{itemize}
+\item concurrent read, exclusive write
+	\begin{itemize}
+	\item mehrere simultane Lesezugriffe
+	\item serielle Schreibzugriffe
+	\end{itemize}
+\item concurrent read, concurrent write
+	\begin{itemize}
+	\item mächstigstes Modell
+	\item kann auf EREW simuliert werden
+	\end{itemize}
+\end{itemize}
+textbf{(n,m)-PRAM} modelliert Parallelrechner mit n Prozessoren und m Speicherworten, ähnlich einem shared memory MIMD System.
+\subsection{LogP}
+\begin{tabular}{lll}
+\textbf{L} & \textit{latency} & für kleine Nachrichten \\
+\textbf{o} & \textit{overhead} & Aufwand für Senden/Empfangen \\
+\textbf{g} & \textit{gap} & Verzögerung zw. 2 Nachrichten (Bandbreite) \\
+\textbf{P} & \textit{processors} & Anzahl Prozessor-/Speichermodule
+\end{tabular}
+\begin{itemize}
+\item anwendbar für massiv parallele Systeme/Cluster
+\item ignoriert lange Nachrichten und Sättigung des Kommunikationsmediums
+\end{itemize}
+\subsection{BSP - Bulk synchronous parallel model} \label{BSP}
+\begin{itemize}
+\item parallele Berechnungen und Kommunikation im Wechsel
+\item Synchronisation zw. den Phasen
+\item keine Gefahr von Deadlocks
+\end{itemize}
+
+\section{Parallele Programmiermodelle}
+\subsection{Erzeugen von Parallelität}
+explizit: 
+\begin{itemize}
+\item Threads: fork/join
+\item Prozesse
+\item RPCs
+\end{itemize}
+implizit:
+\begin{itemize}
+\item Matrixoperationen
+\item Prolog: parallel AND/OR
+\item vektorielle Ausdrücke
+\end{itemize}
+
+Kommunikation: \\
+shared memory oder message passing \\
+\subsection{Programmspezifikation}
+Datenparallelität:
+\begin{itemize}
+\item alle Datenelemente werden gleich behandelt
+\item ein Kontrollfluss
+\item gut Skalierbar
+\item passt gut zu SIMD
+\end{itemize}
+Kontrollparallelität:
+\begin{itemize}
+\item simultane Ausführung verschiedener Instruktionsströme
+\item mehrere Kontrollflüsse
+\item schwer skalierbar
+\item passt gut zu MIMD
+\end{itemize}
+
+\section{Interprozesskommunikation}
+\begin{itemize}
+\item Ein \textbf{Prozess} ist ein Objekt des Betriebssystems, durch das Anwendungen sicheren Zugriff auf die Ressourcen eines Computers erhalten.
+\begin{itemize}
+	\item Prozesse sind voneinander \textbf{isoliert} 
+\end{itemize}
+\item zum Informationsaustausch muss Interprozesskommunikation eingesetzt werden (synchron oder asynchron)
+\item Nachrichtenübertragung ist fehleranfälliger und schwieriger, oft aber die einzige Möglichkeit
+\end{itemize}
+\subsection{Eigenschaften von Netzwerken}
+\begin{itemize}
+	\item Skalierbarkeit
+	\item Zuverlässigkeit
+	\item Sicherheit
+	\item Mobilität - werden mobile Systeme unterstützt
+	\item Quality of Service
+	\item Multicast
+	\item Leistung
+\end{itemize}
+
+\subsection{Leistungsparameter eines Kommunikationskanals}
+\begin{itemize}
+	\item \textbf{Latenzzeit}: Verzögerung zwischen dem Zeitpunkt, zu dem ein  Prozess beginnt, eine Nachricht zu senden, bis zu dem Zeitpunkt, zu dem der empfangende Prozess beginnt, sie zu empfangen.
+	\item \textbf{Bandbreite}: Gesamtmenge der übertragenen Daten per Zeiteinheit.
+	\item \textbf{Jitter}: Varianz in der Latenz. Wichtig für Echtzeitanwendungen.
+\end{itemize}
+
+\section{Persistenz und Synchronität in Kommunikationssystemen}
+Eine Kommunikation ist 
+\begin{itemize}
+	\item \textbf{persistent}, wenn Nachrichten bis zur Auslieferung gespeichert werden
+	\item \textbf{transient}, wenn Nachrichten gespeichert werden, solange Sender und Empfänger ausgeführt werden
+	\item \textbf{synchron}, wenn der Sender blockiert wird, bis die Nachricht beim Empfänger gespeichert oder ausgeliefert wurde.
+	\item \textbf{asynchron}, wenn der Sender unmittelbar nach Senden der Nachricht fortgesetzt wird
+\end{itemize}
+
+\section{MPI - Message Passing Interface}
+Parallelprogrammierung mit Nachrichtenaustausch möglich durch:
+\begin{itemize}
+	\item direkten Zugriff aufs Netzwerk - effizient, aber unportabel
+	\item eigenständige parallele Programmiersprache - zu aufwändig
+	\item Unterprogrammbibliotheken, zB MPI, RPC, RMI
+\end{itemize}
+
+Ziele von MPI:
+\begin{itemize}
+	\item Effizienz durch Parallelität
+	\item Portabilität
+	\item leichte Programmierung
+\end{itemize}
+MPI ist Programmierschnittstelle, nicht -sprache. \textbf{Grundlegende Konzepte} sind:
+\begin{itemize}
+	\item Punkt-zu-Punkt Kommunikation zw. 2 Prozessoreinheiten
+	\item kollektive Operationen
+	\item komplexe Datentypen
+	\item "`Gruppen"', "`Kontexte"', "`Kommunikatoren"' zur koordinierten Kommunikation gleicher PE-Gruppen
+	\item virtuelle Topologien zur effizienten Abbildung der virtuellen auf die reale Prozessortopologie
+\end{itemize}
+\subsection{Punkt-zu-Punkt-Kommunikationsarten}
+\begin{itemize}
+	\item standard: synchron oder gepuffert - je nach Implementierung
+	\item synchron: beendet, wenn Nachricht empfangen wurde
+	\item gepuffert: beendet sofort
+	\item ready: beendet sofort
+\end{itemize}
+Jeweils blocking und non-blocking.
+
+\section{Prozesse und Threads}
+\subsection{Prozesse}
+Ein \textbf{Prozess} ist ein in Ausführung befindliches Programm, welches auf einem Prozessor läuft. \\
+Das Betriebssystem sorgt für \textbf{Nebenläufigkeitstransparenz}, sodass sich Prozesse nicht beeinflussen. \\
+Prozess besteht aus:
+\begin{itemize}
+	\item mindestens einem Thread
+	\item einer Ausführungseinheit mit eigenem Adressraum, Thread-Synchronisation und Kommunikationsressourcen
+\end{itemize}
+
+\subsection{Threads}
+Ein \textbf{Thread} ist Betriebssystemabstraktion einer Aktivität. Threads sind nocht voneinander isoliert und besitzen nur einen Kontext.
+\begin{itemize}
+	\item Einrichtung eines Threads 10 bis 20 mal schneller als eines Prozesses
+	\item Wechsel zu Thread im selben Prozess 5 bis 50 mal schneller
+	\item Threads in einem Prozess können Ressourcen gemeinsam Nutzen ohne auf Interprozesskommunikation zurückzugreifen
+	\item Aber: Threads im selben nicht gegeneinander geschützt
+\end{itemize}
+
+\section{Kommunikation über gemeinsamen Speicher}
+Systemmodelle: Distributed Memory vs. Shared Memory \\
+Verteilter Speicher tauscht Daten per Nachrichten aus \\
+Bei Shared Memory wird in gemeinsamen Speicherbereich geschrieben.
+
+\subsection{Shared Memory}
+Speicherzugriff über gemeinsames Medium, zB Bus.\\
+Kommunikation ist implizit und transparent, Hardware aufwändig und nicht beliebig skalierbar.
+
+\subsection{Distributed Memory}
+\begin{itemize}
+	\item explizite Kommunikation zwischen Prozessen, aber schwierig implementierbar und fehleranfällig
+	\item jeder Knoten mit wenigen anderen verbunden $\rightarrow$ gute skalierbarkeit
+	\item Hardwaretopologie beeinflusst Kommunikationsleistung
+\end{itemize}
+
+\subsection{Cache-Kohärenzprotokolle}
+Cache-Kontroller sorgt für Kohärenz (gleichen Zustand auf allen verteilten Rechnern)
+\begin{itemize}
+	\item CPU, Speicher und Cache brauchen für Multiprozessorsystem nicht geändert werden
+	\item Cache-Kontroller hat 2 Seiten: CPU und Bus
+	\item Reihenfolge der Buszugriffe zur Serialisierung
+\end{itemize}
+
+\subsubsection{Invalidationsprotokolle}
+Neu überschriebener Block wird in anderen Caches invalidiert. Block muss aber im Status \textit{exclusive} sein. \\
+Sobald Block \textit{exclusive} ist, kann ohne weitere Transaktionen geschrieben werden. Ein Block wird durch \textit{read exclusive} belegt, der Bus realisiert die Serialisierung. Kohärenz wird durch \textit{read} und \textit{read exclusive} vom Bus hergestellt.
+
+\subsubsection{Update-Protokolle}
+Schreiboperationen ändern den Wert aller Caches $\rightarrow$ \textbf{update} Transaktion vonnöten. \\
+Vorteile:
+\begin{itemize}
+	\item kürzere Zugriffszeit, Schreibaktionen verursachen keine späteren Cache-Misses
+	\item spart Bandbreite
+\end{itemize}
+Nachteile u.a.:
+\begin{itemize}
+	\item Konsekutive Schreibaktionen des Prozessors erzeugen mehrere Update-Transaktionen.
+\end{itemize}
+
+\subsubsection{MSI Writeback Invalidationsprotokoll}
+Zustände:
+\begin{itemize}
+	\item invalid (i)
+	\item shared (S)
+	\item dirty/modified (M) $\rightarrow$ nur ein Cache besitzt diesen Block
+\end{itemize}
+Prozessorereignisse
+\begin{itemize}
+	\item PrRd (read)
+	\item PrWr (write)
+\end{itemize}
+Bus-Transaktionen:
+\begin{itemize}
+	\item BusRd: Kopie des Blocks ohne Schreibabsicht
+	\item BusRdX: Kopie des Blocks mit Schreibabsicht
+	\item BusWB: schreibt Block in den Speicher
+\end{itemize}
+Aktionen
+\begin{itemize}
+	\item Status aktualisieren, Bus-Transaktionen durchführen, Block lesen/schreiben
+\end{itemize}
+\subsubsection{Erweiterung: MESI}
+Problem mit MSI: read/modify Zyklus erfordert 2 Bustransaktionen, auch wenn der Block nicht als "`shared"' in einem anderen Cache liegt.\\
+Lösung: zusätzlicher Zustand \textbf{exclusive}
+\begin{itemize}
+	\item exclusive (exclusive clean): nur dieser Cache besitzt den Block
+	\item modified (exclusive dirty): nur dieser Cache besitzt den Block, der bereits verändert wurde
+	\item braucht zusätzliches Signal im Bus, das angibt, ob Block shared ist
+\end{itemize}
+\subsection{UMA, NUMA, ccNUMA}
+\begin{itemize}
+	\item UMA: Einsockel-Multicore-Systeme $\rightarrow$ PC, Laptop
+	\item NUMA: Cray T3E (früher), Cray XT5, 6
+	\item ccNUMA: alle Mehrsockel-Multicore-Systeme
+	\item DM: Cluster
+\end{itemize}
+
+\section{OpenMP}
+\subsection{Konzepte}
+\begin{itemize}
+	\item Kommunikation über gemeinsamen Speicher (für Multicore- und SMP-Systeme)
+	\item Fork-Join-Parallelisierung: implizites Multithreading
+	\item Standardisierung
+	\item API bestehend aus Compiler-Direktiven $\rightarrow$ Übersetzung mit Standard-Compiler möglich
+\end{itemize}
+
+\subsection{Konstrukte}
+\begin{itemize}
+	\item Parallele Region - \#pragma omp parallel
+	\item Arbeitsteilung, explizit setzbar durch Scheduletypen - \# pragma omp parallel for
+	\item Datenumgebung 
+	\item Synchronisation
+	\item Laufzeitbibliothek, Prozessumgebung
+\end{itemize}
+
+\textbf{Beispiel:}
+\begin{lstlisting}
+double Results[HUGE];
+#pragma omp parallel for
+for (i=0; i<HUGE; i++) {	// Achtung: Seiteneffekte 
+	do_huge_comp (Results[i]);  // in do_huge_comp vermeiden														 
+}
+\end{lstlisting}
+
+OpenMP Direktiven gelten für einen Block, zB eine for-Schleife. 
+\subsection{Laufzeitverhalten}
+\begin{itemize}
+	\item dynamisch (Standard)
+\begin{itemize}
+	\item Anzahl aktiver Threads zwischen parallelen Regionen variiert
+	\item Setzen der Threads auf maximale Anzahl
+\end{itemize}
+\item statisch
+\begin{itemize}
+	\item Zahl der Threads ist fest
+	\item Kontrolle durch Programmierer
+\end{itemize}
+\end{itemize}
+
+\subsection{Hybride Programmierung}
+Nutzung von MPI und OpenMP
+\begin{itemize}
+	\item OpenMP auf Knoten mit gemeinsamem Adressraum
+	\item MPI für knotenübergreifende Kommunikation
+\end{itemize}
+Vorteile:
+\begin{itemize}
+	\item flexible Anpassung der Anwendung an Zielsystem
+	\item Speichereinsparung durch Nutzung des gemeinsamen Speichers über OpenMP
+	\item numerische Libraries laufen automatisch mit mehreren Threads
+\end{itemize}
+
+\section{MapReduce}
+MapReduce = skalierbares, fehlertolerantes, paralleles oder verteiltes Programmierparadigma \\
+Kann als Realisierung von BSP angesehen werden - siehe auch \nameref{BSP} \\
+2 Phasen, dazwischen Kommunikation und in der Regel mehrere Iterationen in Schleife \\
+\includegraphics[width=15cm]{mapReduce.png}
+
+\section{Zeit in verteilten Systemen}
+\subsection{Uhren in verteilten Systemen}
+Wozu?
+\begin{itemize}
+	\item Zeitstempel zB für Abhängigkeiten in makefiles, Ticketverfahren usw..
+\end{itemize}
+\textbf{Problem}: in verteilten Systemen existiert keine globale Uhrzeit. \\
+\textbf{Lösung}: logische Zeit
+
+\subsection{Logische Uhren}
+\subsubsection{Zustände und Ereignisse}
+Verteiltes System = Menge von N Prozessen $p_{i}$ mit i = 1,2,...,N \\
+Jeder $p_{i}$ besitzt einen Zustand $s_{i}$ abhängig von seinen Variablen. \\
+Kommunikation ausschließlich per Nachrichtenaustausch \\
+Prozesse führen Aktionen aus. Interessant sind nur Aktionen, die den Zustand verändern $\rightarrow$ Ereignisse. \\
+Ordnungsrelation: e $\rightarrow_{i}$ e' genau dann wenn e vor e' in $p_{i}$ stattfindet. \\
+Entspricht der kausalen Reihenfolge des Auftretens der Ereignisse. Auch \textbf{happens before Relation} genannt. \\
+Für Prozess $p_{i}$ mit $p_{i}: e \rightarrow_{i} e'$, dann gilt e $\rightarrow$ e'. \\
+Für jede Nachricht m gilt: send(m) $\rightarrow$ receive(m). \\
+Falls e $\rightarrow$ e' und e' $\rightarrow$ e'' gilt auch e $\rightarrow$ e''
+
+\subsubsection{Logische Zeit}
+Statt Uhren zu synchronisieren werden Ereignisse in logische Reihenfolge gebracht. Nicht alle Ereignisse lassen sich mit "`$\rightarrow$"' anordnen. Nebenläufige Ereignisse werden mit a||e gekennzeichnet.
+
+\subsubsection{Lamports logische Uhren}
+Eine logische Uhr ist ein monoton ansteigender Softwarezähler. Wert steht nicht in Beziehung zur Uhrzeit. \\
+Jeder Prozess $p_{i}$ besitzt eine eigene logische Uhr, um Ereignisse mit Zeitstempeln zu versehen. \\
+
+\subsubsection{Vektoruhren}
+Mit Lamport-Uhren kann aus L(e) < L(e') nicht auf e $\rightarrow$ e' geschlossen werden. \\
+Vektoruhren sind Erweiterungen der Lamportuhren. Eine Vektoruhr $V_{i}$ im Prozess $p_{i}$ ist ein Array von N Integern. \\
+\begin{itemize}
+	\item VC1: $V_{i}[j] = 0$ initial für alle i,j $\in$ N
+	\item VC2: Bevor $p_{i}$ einem Ereignis einen Zeitstempel gibt, setzt er \\ $V_{i}[i] := V_{i}[i]+1$.
+	\item VC3: $p_{i}$ gibt jeder gesendeten Nachricht den Wert t = $V_{i}$ mit.
+	\item VC4: Wenn $p_{i}$ in einer Nachricht einen Zeitstempel empfängt, setzt er \\ $V_{i}[j]$ := max$(V_{i}[j],t[j]), j \in N$
+\end{itemize}
+Eine Vektoruhr hat dann die Form $V_{i}$ = (0,1,4,1) für 4 Prozesse.
+\subsubsection{Vergleich von Vektorzeitstempeln}
+Für zwei Vektoruhren V und V' gilt:
+\begin{itemize}
+	\item V = V' genau dann wenn V[i] ) V'[i] für i $\in$ 1,2,...,N
+	\item V $\leq$ V' genau dann wenn V[i] $\leq$ V'[i] für i $\in$ 1,2,...,N
+	\item V < V' genau dann wenn V $\leq$ V' $\wedge$ V != V'
+	\item V || V' genau dann wenn $\neg$(V < V') $\wedge$ $\neg$(V' < V) $\rightarrow$ nebenläufig. Beispiel: (2,1,0) und (0,0,1)
+\end{itemize}
+
+\section{Globale Zustände}
+\subsection{Snapshot}
+Ermittlung des globalen Zustands eines verteilten Systems. \\
+Chandy-Lamport Algorithmus 1985: "`Distributed Snapshot Algorithm"', ermittle einen Zustand in dem das System möglicherweise war, der \textbf{konsistent} ist. \\
+\textbf{Konsistenz}: Wenn festgehalten wurde, dass P eine Nachricht von Q empfangen hat, muss auch festgehalten sein, dass Q diese geschickt hat. \\
+\includegraphics[width=15cm]{konsistenterSchnitt.png}
+
+\subsection{Definition eines Schnittes}
+Gegeben:
+\begin{itemize}
+	\item System mit N Prozessen $p_{i}$
+	\item Menge der globalen Zustände S = ($s_{1}$, ..., $s_{n}$ wird betrachtet. Welche sind möglich?
+	\item Jeder Prozess kann durch die \textbf{history} seiner Ereignisse charakterisiert werden: \\
+				history($p_{i}$) = $h_{i}$ = <$e_{i}^{0}, e_{i}^{1}, e_{i}^{2}$, ...>
+	\item Jedes endliche Präfix der Geschichte eines Prozesses wird bezeichnet mit: \\
+				$h_{i}^{k}$ = <$e_{i}^{0}, e_{i}^{1}, e_{i}^{2}$, ..., $e_{i}^{k}$>
+\end{itemize}
+\textbf{Definition}: Ein \textbf{Schnitt} ist eine Teilmenge der globalen history, d.h. \\
+C = $h_{1}^{c1} \cup h_{2}^{c2} \cup$ ... $\cup h_{N}^{cN}$ \\ \\
+Aus Sicht des Prozesses $p_{i}$ gilt: Der Zustand $s_{i}$ im globalen Zustand S, der dem Schnitt C entspricht, ist genau derjenige, der von $p_{i}$ durch das Ausführen des letzten Ereignisses im Schnitt erreicht wird, also $e_{i}^{c_{i}}$ . \\
+Die gesamte Ereignismenge \{$e_{i}^{c_{i}}$: i = 1,...,N\} wird als Grenze (frontier) bezeichnet. \\
+Ein Schnitt ist \textbf{konsistent}, wenn er für jedes Ereigniss, das er enthält, auch alle Ereignisse enthält, die zu diesem in der happens-before Relation stehen: $\forall e \in C, f \rightarrow e \Rightarrow f \in C$ \\
+Ein konsistenter globaler Zustand ist ein Zustand, der einem konsistenten Schnitt entspricht. Die Ausführung des verteilten Systems kann als Folge globaler konsistenter Zustände beschrieben werden: $S_{0} \rightarrow S_{1} \rightarrow S_{2} \rightarrow ...$. \\
+\subsection{Der verteilte Snapshot-Algorithmus von Chandy und Lamport}
+Annahmen:
+\begin{itemize}
+	\item Zuverlässige Punkt-zu-Punkt-Kommunikation zwischen Prozessen
+	\item Kanäle sind unidirektional und FIFO
+	\item Prozessgraph ist zusammenhängend
+\end{itemize}
+Vorgehen
+\begin{itemize}
+	\item Einer oder mehrere Prozesse starten den Algorithmus
+	\item Das System läuft unterdessen normal weiter
+	\item Prozesse verständigen sich über Markernachricht über die Notwendigkeit der Speicherung des Systemzustands
+\end{itemize}
+
+\begin{lstlisting}
+receive a marker M on channel in;
+do {
+	if (M is the first received marker) {
+		record internal process state;
+		for (each outgoing channel i)
+			send one marker M over channel i; /* before sending any
+other message over i */
+		for (each incoming channel i except in) {
+			initialize state of c[i] = { };
+			turn on recording of messages arriving over 
+				channel i in c[i];
+		}
+	} else
+			finish recording of channel in;
+} until (received a marker on each incoming channel) /* we're done then */
+\end{lstlisting}
+
+\section{Speichermodelle und Konsistenz}
+\subsection{Speichermodelle}
+definieren, welche Ergebnisse Lese- und Schreibtransaktionen zurückliefern, insbesondere konkurrierende.  \\
+sind das Interface zwischen Hardware und der Semantik der darauf laufenden Software.
+ 
+\subsection{Konsistenzmodelle}
+Vertrag zwischen Datenspeicher und darauf zugreifenden Prozessen. \\
+Erwartung: Ergebnis eines Read liefert immer den Wert des letzten Write. \\
+Arten von Konsistenzmodellen:
+\begin{itemize}
+	\item Datenzentrierte: Aus sicht des Speichers
+	\item Klientenzentrierte: Aus sicht des Client
+\end{itemize}
+
+\subsubsection{Strenge Konsistenz}
+Alle Schreiboperationen sind für alle Prozesse unmittelbar sichtbar und es existiert eine globale, für alle gleiche absolute Reihenfolge.
+
+\subsubsection{Sequentielle Konsistenz}
+Das Ergebnis der Ausführung ist das selbe,
+\begin{itemize}
+	\item als wenn die Lese- und Schreib-Operationen von allen Prozessen auf dem Datenspeicher in irgendeiner sequentiellen Reihenfolge  			ausgeführt worden wären
+	\item und die Operationen in jedem einzelnen Prozess in der von dem Programm vorgesehenen Reihenfolge ausgeführt werden (sog. 						Programmreihenfolge).
+	\item alle Prozesse sehen selbe Verzahnung
+	\item über Zeit wird nichts ausgesagt
+\end{itemize}
+\includegraphics[width=15cm]{sequentielleKonsistenz.png}
+\subsubsection{Linearisierbarkeit}
+Ein Datenspeicher ist \textbf{linearisierbar} wenn jede Operation einen lose synchronisierten
+Zeitstempel besitzt und die folgenden drei Bedingungen gelten:
+\begin{itemize}
+	\item Das Ergebnis jeder Ausführung ist dasselbe, als wären die Lese- und Schreiboperationen aus Sicht des Speichers von allen 							Prozessen in irgend einer sequenziellen Reihenfolge ausgeführt worden.
+	\item Wenn $timestamp_{OP1}$(x) < $timestamp_{OP2}$(x), dann muss der Speicher die Operation OP1 vor OP2 sehen.
+	\item Die Operationen in allen Prozessen erscheinen in der vom Programm vorgesehenen Reihenfolge.
+\end{itemize}
+Ein linearisierbarer Datenspeicher ist auch sequentiell konsistent.
+
+\subsubsection{Kausale Konsistenz}
+Ein Speicher ist kausal konsistent wenn alle Schreiboperationen, die potentiell in einem kausalen Verhältnis stehen, von allen Prozessen in derselben Reihenfolge gesehen werden.
+\begin{itemize}
+	\item Nebenläufige Schreiboperationen, die in keinem kausalen Verhältnis stehen, können von verschiedenen Prozessen in 											unterschiedlicher Reihenfolge gesehen werden.
+	\item Schwächeres Modell als sequentielle Konsistenz.
+	\item Vergleichbar mit Lamports "`happens before"'-Relation.
+\end{itemize}
+\includegraphics[width=15cm]{kausaleKonsistenz.png}
+Schreiboperationen können auch über dazwischenliegende Leseoperationen Kausalketten aufbauen: \\
+\includegraphics[width=15cm]{kausaleKonsistenz2.png} \\
+Kausale Konsistenz trifft auf \textbf{alle} Abhängigkeiten zu, also auch Kommunikationsoperationen.
+
+\subsubsection{FIFO-Konsistenz}
+Ein Speicher ist \textbf{FIFO-konsistent}, wenn
+\begin{itemize}
+	\item die innerhalb eines Prozesses ausgeführten Schreiboperationen von allen anderen Prozessen in der Reihenfolge gesehen werden, in der sie ausgeführt werden,
+	\item während Schreiboperationen unterschiedlicher Prozesse von anderen Prozessen in beliebiger Reihenfolge gesehen werden dürfen. \\
+(Dies ist die Abschwächung gegenüber der Kausalen Konsistenz)
+\end{itemize}
+Folgendes Beispiel ist nicht kausal konsistent, aber FIFO-konsistent: \\
+\includegraphics[width=15cm]{fifoKonsistenz.png}
+\subsection{Konsistenzmodelle in verteilten Transaktionen}
+\subsubsection{Schwache Konsistenz}
+In Transaktionssystemen ist (von außen betrachtet) die Reihenfolge der
+Schreiboperationen innerhalb kritischer Bereiche irrelevant; lediglich am
+Ende müssen die Kopien synchron sein. Dies wird schwache Konsistenz
+genannt. \\
+Vorgehen: Alle Schreiboperationen werden lokal ausgeführt, anschließend werden die Kopien synchronisiert.
+\begin{itemize}
+	\item Schwache Konsistenz ist auf \textbf{Gruppen von Operationen} definiert
+	\item Schwache Konsistenz definiert \textbf{Synchronisationszeitpunkte}, nicht die Form der Konsistenz. Verteilter Speicher darf vorübergehend inkonsistent sein. 
+\end{itemize}
+\includegraphics[width=15cm]{schwacheKonsistenz.png}
+
+\subsubsection{Release-Konsistenz}
+Gemeinsam benutzte Daten werden beim Verlassen eines kritischen Bereichs synchronisiert. Daten stehen jedem Prozess nach "`acquire"' zur Verfügung. Wenn "`acquire"' nicht benutzt sind, sind die Daten undefiniert. Beispiel: \\
+\includegraphics[width=15cm]{releaseKonsistenz.png}
+
+\subsubsection{Entry-Konsistenz}
+\textbf{Gemeinsame Daten} eines kritischen Bereichs werden erst direkt vor Eintritt synchronisiert. \\
+\includegraphics[width=15cm]{entryKonsistenz.png}
+
+\subsection{Klientenbasierte Konsistenzmodelle}
+In verteilten Systemen werden Objekte idR öfter gelesen als geschrieben. Konsistenzgarantien werden für Sitzungen benötigt. \\
+\textbf{Sitzung}: Folge logisch zusammengehörender Lese- und Schreibzugriffe einer Anwendung. \\
+Dafür ist die (schwächere) klientenbasierte Konsistenz genügend.
+\subsubsection{Monotones Lesen}
+Wenn ein Prozess den Wert eines Datenelements x liest, gibt jede
+nachfolgende Leseoperation für x in diesem Prozess denselben oder einen
+aktuelleren Wert zurück. \\
+Nur für einen einzelnen Klienten wird Lesekonsistenz garantiert, nicht jedoch für nebenläufige Zugriffe.
+
+\subsubsection{Monotones Schreiben}
+Die Schreiboperation eines Prozesses am Datenelement x wird
+abgeschlossen, bevor eine nachfolgende Schreiboperation auf x durch
+denselben Prozess erfolgen kann. \\
+Es werden mindestens die Kopien synchronisiert, auf denen danach eine neue Schreiboperation beginnt. 
+
+\subsubsection{Read-Your-Writes Konsistenz}
+Die Folge einer Schreiboperation eines Prozesses auf ein Datenelement x wird in
+nachfolgenden Leseoperationen auf x durch denselben Prozess stets sichtbar
+sein. \\
+Laufende Schreiboperationen werden abgeschlossen, bevor eine nachfolgende Leseoperation
+desselben Prozesses ausgeführt wird.
+
+\subsubsection{Writes-Follow-Reads-Konsistenz}
+Schreiboperationen desselben Prozesses auf x erfolgen stets auf dem
+zuletzt gelesenen Wert, egal von welcher Kopie x zuletzt gelesen wurde. \\
+\includegraphics[width=15cm]{writesFollowsReads.png}
+
+\section{Erlang}
+dynamisch getypte Sprache mit schwachen Methoden, um eigene Datentypen zu bauen. 
+Real-Time Garbage Collectin, wobei jeder Prozess seinen eigenen Heap besitzt.
+\subsection{"`Variablen"'}
+\begin{itemize}
+	\item bekommen nur einmal einen Wert zugewiesen
+	\item beginnen mit Großbuchstaben oder Unterstrich
+	\item "`\_"' steht immer wieder für nicht belegte Variable
+	\item Variablen der Form "`\_Foo"' stehen für Variablen, deren Wert nicht benötigt wird (Konvention)
+\end{itemize}
+
+\subsection{=}
+Bedeutung wie in der Mathematik, diese Operation verändert keine Werte von bereits belegten Variablen, sondern wertet aus, ob die Ausdrücke links und rechts matchen (kann zu Exception führen). \\
+Zuweisungsoperator ist "`:="'
+
+\subsection{Funktionen}
+Der letzte Ausdruck einer Funktion ist ihr Rückgabewert. \\
+f() -> 27. \\ \\
+g(1) -> 1; \\
+g(X) -> f() + X. \\ \\
+h(X, Y) -> \\
+\hspace*{5mm} Z = g(Y), \\
+\hspace*{5mm} X + Z. \\ \\
+
+Beispiel simple\_math.erl: \\
+\begin{lstlisting}
+-module(simple_math).
+-export([square/1]).
+square(X) ->
+     X * X.
+cube(X) ->
+     square(X) * X.
+\end{lstlisting}
+
+\subsection{Atome}
+sind für sich selbst stehende Identifikatoren. Atome fangen mit Kleinbuchstaben an und können durch einfache Anführungszeichen umrahmt werden.
+
+\subsection{Tupel}
+sind container statischer Länge, die häufig ein Atom als Identifikator an erster Stelle besitzen. \\
+Beispiel:
+\begin{lstlisting}
+Car = {car,
+           {honda, civic},
+           {horsepower, 100}}.
+           
+{car, Type, Power} = Car.
+\end{lstlisting}
+$\rightarrow$ Type = \{honda, civic\} und Power = \{horsepower, 100\}
+
+\subsection{Listen}
+sind Container variabler Länge, die einfach verkettet sind. \\
+Um Anfang und Rest der Liste zu bekommen, wird \textbf{[Head|Tail]} verwendet. \\
+Beispiele
+\begin{lstlisting}
+List = [1, 2, 3, four, 5.0]
+[Head|Tail] = List
+[H1,H2|T2] = List
+\end{lstlisting}
+\subsection{Module}
+Logisch getrennte Codeblöcke. Mit \textit{modulname:funktion} kann über Modulgrenzen hinweg gearbeitet werden. Alternativ können Module mittels \textit{-import(modul)} importiert werden.
+
+\subsection{Anonyme Funktionen: fun(X)}
+\begin{lstlisting}
+Square = fun(X) -> X * X end.
+Cube = fun(X) -> Square(X) * X end.
+\end{lstlisting}
+
+\subsection{Parallelverarbeitung}
+leichtgewichtige Prozesse
+\begin{itemize}
+	\item Code wird immer innerhalb eines Prozesses ausgeführt
+	\item keine Nutzung von Betriebssystem-Prozessen oder Threads
+	\item intern gescheduled, Prozesse teilen keine Ressourcen (eigener Heap)
+\end{itemize}
+Prozesse können mit Namen registriert werden: register(Name, Pid) \\
+$\rightarrow$ Name oder Pid eines Prozesses muss bekannt sein, um Nachrichten senden zu können.
+Nicht-lokale Fehlerbehandlung: Nicht alle Prozesse müssen korrekt sein $\rightarrow$ bessere Fehlertoleranz \\
+Kein shared Memory zur Vermeidung von:
+\begin{itemize}
+	\item kritischen Sektionen
+	\item Deadlocks
+	\item Abhängigkeiten zwischen Prozessen
+	\item fehlender Unterstützung von Verteilung
+\end{itemize}
+
+\subsection{Prozesse}
+Einheit für Parallelverarbeitung, die von der Laufzeitumgebung (nicht dem OS) verwaltet wird $\rightarrow$ leichtgewichtig und kooperativ. \\
+Verwaltung:
+\begin{itemize}
+	\item Pid = spawn(Fun, [Parameters]) zum Starten eines Prozesses
+	\item Pid ! Message zum Senden einer Nachricht
+	\item receive/1 built-in functions zum Empfangen von Nachrichten
+	\item Senden und Empfangen asynchron möglich
+\end{itemize}
+\subsection{Fehlertoleranz}
+Prozesse können gekoppelt (linked) werden, um eine Fehlerkette zu definieren. Stirbt ein Prozess, bekommen gekoppelte Prozesse ein exit-Signal. Links werden mittels \textit{link(Pid)} oder \textit{spawn\_link(Module, Function, Args)} angelegt und sind bidirektional. Mittels \textit{unlink(Pid)} können Links aufgehoben werden. \\
+Ein Prozess kann explizit das Exit-Signal senden: \textit{exit(Pid, Reason)}. Dafür muss kein Link vorhanden sein. \\
+Stirbt ein Prozess wegen eines Fehlers, bewirkt das Exit-Signal im Standardfall, dass auch die Empfänger beendet werden $\rightarrow$ Propagierung des Signals. \\
+Die Exit-Signale können explizit behandelt werden: \textit{process\_flag(trap\_exit, true)}. \\
+
+\section{Gruppenkommunikation}
+\subsection{Abstraktionen}
+\subsubsection{Prozesse}
+Verteilter Algorithmus besteht aus einer Menge verteilter Prozesse, die mit- und untereinander kommunizieren. Ein Prozess kann als endlicher Automat angesehen werden. \\
+Ein korrekter Prozess bearbeitet eine unendliche Anzahl an Events und stürzt nicht ab.  \\
+Prozesse kommunizieren durch den Austausch von Events. Ein verteilter Algorithmus lässt sich als Menge von Event-Handlern beschreiben. Die Events legen den Programmablauf durch ihr Auftreten fest. \\
+Eigenschaften von Prozessen:
+\begin{itemize}
+	\item Sicherheit (safety): Nothing bad happens
+	\item Lebendigkeit (liveness): Something good will happen
+\end{itemize}
+Ausfallmodelle für Prozesse: \\
+Die Fehlereinheit sind Prozesse $\rightarrow$ entweder ein Prozess arbeitet, oder er ist komplett abgestürzt. \\
+Fehlerklassen: 
+\begin{enumerate}
+	\item Absturz (crash)
+	\item Auslassung (omission)
+	\item Wiederanlaufen mit altem persistentem Zustand
+	\item bösartige (byzantinische) Fehler
+\end{enumerate}
+Crash Stop: Prozess stoppt und macht dann nichts mehr \\
+Crash Recovery: Prozess stoppt, arbeitet später aber vielleicht weiter. Der Zustand kann persistent gespeichert sein. \\
+Korrekter Prozess: Prozess, der nicht ausfällt.
+
+\subsubsection{Zeit}
+Ausfalldetektor: Erkennt, ob ein anderer Prozess abgestürzt ist. \\
+Vorteile:
+\begin{itemize}
+	\item Prozess- und Link-Abstraktionen benötigen kein Zeitkonzept
+	\item Verhalten von Ausfällen kann ohne das Zeitkonzept beschrieben werden
+\end{itemize}
+Es gibt Ausfalldetektoren für partiell und vollständig synchrone Systeme. \\
+\textbf{Perfekter Ausfalldetektor}: \\
+\begin{itemize}
+	\item Voraussetzungen: synchrones System und PerfectPointToPointLinks pp2p
+	\item Ereignisse: indication: <crash | $p_{i}$> um mitzuteilen, dass $p_{i}$ ausgefallen ist
+	\item Eigenschaften: \\
+	\textbf{PFD1 (Vollständigkeit, strong completeness)}: Jeder abgestürzte Prozess wird durch jeden Prozess erkannt. \\ \textbf{PFD2 (Genauigkeit, strong accuracy)}: Prozess p wird erkannt $\rightarrow$ p ist ausgefallen. 
+\end{itemize}
+\textbf{Korrektheit (Grundidee)} \\
+\begin{itemize}
+	\item Vollständigkeit: Wenn ein Prozess abstürzt, sendet er keine Hearbeats mehr. Der Ausfalldetektor erhält dann wegen der pp2p-Links keine Heartbeats mehr und er erkennt P als abgestürzt.
+	\item Genauigkeit: Nur wenn ein Prozess keine Heartbeats mehr schickt, kann er als
+abgestürzt erkannt werden.
+\end{itemize}
+
+\subsubsection{Abstraktion für Kommunikationskanäle}
+\textbf{Kommunikationskanal (channel, link)} \\
+Punkt-zu-Punkt Kommunikation mit gegebenen Eigenschaften \\
+einheitliche Schnittstelle \\
+Fair-Loss Link
+\begin{itemize}
+	\item Nicht alle Nachrichten gehen verloren: $\infty$ oft senden $\rightarrow$ $\infty$ oft ausliefern
+	\item Link erzeugt keine eigenen Nachrichten
+	\item Nachricht endlich oft senden $\rightarrow$ Nachricht nicht unendlich oft ausliefern
+\end{itemize}
+
+Stubborn-Link
+\begin{itemize}
+	\item Nachricht einmal senden $\rightarrow$ Nachricht unendlich oft ausliefern
+	\item Link erzeugt keine eigenen Nachrichten
+\end{itemize}
+
+Perfect Link
+\begin{itemize}
+	\item Jede gesendete Nachricht wird letztendlich ausgeliefert
+	\item Keine Nachricht wird mehrfach ausgeliefert
+	\item Link erzeugt keine eigenen Nachrichten
+\end{itemize}
+
+\subsection{Multicasts}
+senden Nachrichten an eine Gruppe von Prozessen. Wie Broadcast, aber für Gruppen. Sie besitzen eine einheitliche Schnittstelle und können - ähnlich wie Links - aufeinander aufbauen, um Auslieferungsgarantien (auch bzgl. der Reihenfolge) zu erreichen.
+Geschlossene Gruppen:
+\begin{itemize}
+	\item Nur Mitglieder der Gruppe können an die Gruppe senden
+	\item Sender liefert die Nachricht auch an sich selber aus
+\end{itemize}
+Offene Gruppen
+\begin{itemize}
+	\item Benachrichtigung sowohl innerhalb als auch von außerhalb möglich
+\end{itemize}
+
+\subsubsection{Best-Effort Multicast}
+Sendet allen Prozessen der Gruppe inkl. sich selbst eine Nachricht. Gibt keine Zuverlässigkeitsgarantien, fällt also ein Sender aus, können einige Nachrichten ausgeliefert sein, andere Empfänger bekommen sie nicht. \\
+Eigenschaften:
+\begin{itemize}
+	\item BEM1 Gültigkeit: Wenn $p_{i}$ und $p_{j}$ korrekt sind, wird jede gesendete Nachricht schließlich ausgeliefert
+	\item BEM2 Keine Duplikate: Keine Nachricht wird mehrfach ausgeliefert
+	\item BEM3 Keine Erzeugung: Keine Nachricht wird ausgeliefert, die nicht gesendet wurde.
+\end{itemize}
+
+\subsubsection{Reliable Multicast}
+\textbf{Motivation:} \\
+\textbf{bem} sichert korrekte Auslieferung zu, solange der Sender nicht ausfällt. Bei Ausfall ist die Situation aber unklar und perfect links garantieren nicht die Auslieferung bei Ausfall des Senders. \\
+\textbf{rm} sichert korrekte Auslieferung an korrekte Prozesse auch bei Ausfall des Senders zu. Die korrekten Prozesse einigen sich über die Menge der auszuliefernden Nachrichten. \\
+\textbf{Eigenschaften:}
+\begin{itemize}
+	\item RM1 = BEM1 Gültigkeit: $p_{i}$ und $p_{j}$ korrekt $\rightarrow$ jede gesendete Nachricht wird schließlich ausgeliefert
+	\item RM2 = BEM2 Keine Duplikate
+	\item RM3 = BEM3 Keine Erzeugung
+	\item RM4 \textbf{Alle korrekten Prozesse oder keiner:} Wird m von einem korrekten Prozess ausgeliefert, liefern alle korrekten Prozesse m aus
+\end{itemize}
+
+\subsubsection{Uniform Reliable Multicast (URM)}
+\textbf{Motivation:} \\
+Bei rm einigen sich nur die korrekten Empfängerprozesse, ob Nachricht bei Ausfall des Senders ausgeliefert werden soll. \\
+Bei urm einigen sich alle Prozesse. \\
+\textbf{Eigenschaften:}
+\begin{itemize}
+	\item URM1 = BEM1 Gültigkeit
+	\item URM2 = BEM2 Keine Duplikate
+	\item URM3 = BEM3 Keine Erzeugung
+	\item URM4 \textbf{Liefert irgendein Prozess aus, so liefern alle korrekten Prozesse aus:} Wird m von irgendeinem (korrekten oder fehlerhaften) Prozess ausgeliefert, so liefern alle korrekten Prozesse m aus.
+\end{itemize}
+\subsubsection{Stubborn Multicast}
+Geht mit Crash-Recovery Prozessen um. Idee: Multicast über Stubborn-Link. Infolgedessen werden Nachrichten unendlich oft ausgeliefert. \\
+$\rightarrow$ kein Aufwand für Logging, kein Ausfalldetektor nötig
+\subsubsection{Logged BEM}
+Geht ebenfalls mit Crash-Recovery Prozessen um, ggf. mit persistentem Zustand, vermeidet aber doppelte Auslieferung. Der Multicast erfolgt über einen Stubborn-Link, bei Auslieferung wird aber geloggt und vor Auslieferung das log abgefragt.
+\subsection{Geordnete Multicasts}
+Basis-Multicasts liefern in beliebiger Reihenfolge aus.
+\begin{itemize}
+	\item FIFO-Ordnung: Sendet ein korrekter Prozess erst m und dann m', wird m auch vor m' von jedem korrekten Prozess ausgeliefert.
+	\item Kausale Ordnung: wenn multicast(g,m) $\rightarrow$ multicast(g,m'), wird m vor m' von jedem korrekten Prozess ausgeliefert.
+	\item Totale Ordnung: Liefert ein korrekter Prozess Nachricht m vor Nachricht m' aus, dann liefert jeder andere korrekte Prozess, der m' ausliefert, zuvor m aus.
+\end{itemize}
+\subsubsection{FIFO geordneter Multicast}
+Benutzt einen beliebigen Basis-Multicast, zB bem-, rm- oder urm-multicast. \\
+Jeder Prozess besitzt:
+\begin{itemize}
+	\item $S_{pg}$ Zähler der Nachrichten p an Gruppe g
+	\item $R_{qg}$ Zähler der Nachrichten an Gruppe g, die p von q ausgeliefert hat
+\end{itemize}
+\textbf{Algorithmus:} \\
+\begin{itemize}
+	\item Will p an g fo-multicasten, fügt er $S_{pg}$ der Nachricht hinzu, multicastet sie und erhöht $S_{pg}$ um 1
+	\item beim Empfang einer Nachricht von q mit Sequenznummer S prüft p, ob S = $R_{qg}$ + 1. Falls ja, wird mittels fo-deliver ausgeliefert
+	\item Der B-multicast stellt sicher, dass Nachrichten schließlich ausgeliefert werden, es sei denn der Sender fällt aus
+\end{itemize}
+\subsubsection{Kausal geordneter Multicast}
+Nutzt die Happens Before Relation - aber nur auf Multicastnachrichten - sowie Vektorzeitstempel. \\
+\textbf{Algorithmus:} \\
+\begin{itemize}
+	\item Nach Auslieferung einer Nachricht von $p_{j}$ aktualisiert $p_{i}$ seinen Zeitstempel durch Erhöhen des j-en Elements des Vektors
+	\item Verglichen mit der normalen Vektoruhrregel, wo $V_{i}[j]$ := max($V_{i}[j]$, t[j]) für j=1, 2, ...N wissen wir in diesem Algorithmus, dass sich nur das j-te Element erhöht.
+	\item Wird rm-multicast statt bem-multicast genutzt, so ist das Protokoll sowohl zuverlässig, als auch kausal geordnet.
+	\item Wird es mit einem Sequenz-Algorithmus gekoppelt erhält man totale und kausale Ordnung.
+\end{itemize}
+
+\subsubsection{Total Order Multicast}
+Ansatz: Anhängen total geordneter Identifikatoren an Multicastnachricht. Jeder empfangene Prozess ordnet die Nachrichten anhand der Identifikatoren ähnlich dem FIFO-Algorithmus. Die Prozesse haben jedoch gruppenspezifische Sequenznummern. \\
+Für den total geordneten Multicast existieren zwei Lösungsansätze mittels Basis-Multicast:
+\begin{itemize}
+	\item Nutzung eines globalen Sequenznummerngenerators
+	\item Die Prozesse einigen sich gemeinsam auf eine Sequenznummer für jede Nachricht, zB mittels ISIS-Algorithmus.
+\end{itemize}
+
+\section{Konsens}
+Grundlegendes Problem in verteilten Systemen. Anwendungen unter andererem:
+\begin{itemize}
+	\item Berechnung von Schnappschüssen
+	\item Deadlockerkennung
+	\item Broad-/Multicast
+	\item Election
+	\item Mutual Exclusio
+\end{itemize}
+\subsection{Regulärer Konsens}
+Grundidee: Prozesse tauschen vorgeschlagene Werte in Runden aus und einigen sich nach N Runden. \\
+Es gibt hierfür zwei verschiedene Algorithmen: 
+\begin{itemize}
+	\item Flooding: wenige Runden, dafür viele Nachrichten
+	\item Hierarchical Consensus: wenige Nachrichten aber viele Runden
+\end{itemize}
+\subsubsection{Voraussetzungen}
+\begin{itemize}
+	\item Prozesse sind eindeutig unterscheidbar (Pid, totale Ordnung)
+	\item Prozesse dürfen jederzeit ausfallen, werden dann aber nicht neu gestartet
+	\item perfekter Ausfalldetektor
+	\item perfekte Kommunikationskanäle - jede Nachricht wird letztendlich ausgeliefert
+\end{itemize}
+\subsubsection{Ereignisse}
+\begin{itemize}
+	\item Vorschlag: <cPropose, v> um Wert v vorzuschlagen
+	\item Ergebnis: <cDecide, v> um entschiedenen Wert v zurückzuliefern
+\end{itemize}
+
+\subsubsection{Eigenschaften}
+\begin{tabular}{ll}
+\textbf{C1 Gültigkeit} & Wenn ein Prozess v entscheidet, so wurde v von einem Prozess vorgeschlagen. \\
+\textbf{C2 Übereinstimmung} & Keine zwei korrekten Prozesse entscheiden unterschiedlich. \\
+\textbf{C3 Termination} & Jeder korrekte Prozess entscheidet letztendlich. \\
+\textbf{C4 Integrität} & Kein Prozess entscheidet mehr als einmal. \\
+\end{tabular}
+
+\subsubsection{Flooding}
+\textbf{Start:} Der <cPropose, v> ausführende Prozess schlägt den Wert v vor und sendet ihn per Multicast an alle anderen Prozesse. \\
+\textbf{Runden 1....N}: 
+\begin{itemize}
+	\item jeder Prozess sammelt alle vorgeschlagenen Werte
+	\item in jeder Runde schickt jeder Prozess alle Werte an alle 
+	\item werden neue Werte erhalten, werden diese mit der eigenen Wertemenge vereinigt
+	\item Runde wird erst beendet, wenn alle Vorschläge von allen korrekten Prozessen erhalten wurden
+		\begin{itemize}
+			\item jede Nachricht enthält die Rundennummer 
+		\end{itemize}
+\end{itemize}
+Ein Prozess darf entscheiden, sobald er von allen anderen korrekten Prozessen einen Vorschlag erhalten hat und in der letzten Runde kein Prozess neu ausgefallen ist, da dieser sonst an einige seine Wertemenge gesendet haben kann, an andere nicht. \\
+\textbf{Komplexität:} 
+\begin{itemize}
+	\item Bester Fall (keine Ausfälle): 1 Runde
+	\item Schlechtester Fall (N-1 Ausfälle): N Runden
+	\item in jeder Runde $N^{2}$ Nachrichten vor Entscheidung und $N^{2}$ decided-Nachrichten
+	\item im schlechtesten Fall also N Runden * $N^{2}$ Nachrichten = O($N^{3}$)
+\end{itemize}
+
+\subsubsection{Reg. Kons. durch hierarchische Entscheidung}
+\textbf{Voraussetzung:} totale Ordnung auf den Prozessen: $p_{1} > p_{2} > ... > p_{n}$ \\
+\textbf{Grundidee:} Der korrekte Prozess mit dem höchsten Rang (kleinste ID) entscheidet autonom. Wenn also $p_{1}$ nicht abstürzt, müssen alle anderen seinen Wert übernehmen. \\
+\textbf{Allgemein:} In der k-ten Runde entscheidet $p_{k}$ und broadcastet seine Entscheidung. Alle anderen warten auf Entscheidung von $p_{k}$ oder auf Meldung über den Ausfall von $p_{k}$. \\
+So wird eine schnelle Rückgabe des Ergebnisses ermöglicht, bevor alle Prozesse entschieden haben.  \\
+\textbf{Komplexität:} Braucht immer N Runden, je Runde werden N Nachrichten versandt, da immer nur ein Prozess broadcastet. \\
+Verbesserung: Keine Nachrichten an ranghöhere Prozesse senden.
+
+\subsection{Uniform Consensus}
+Keine zwei Prozesse entscheiden unterschiedlich, korrekt oder nicht. Wenn der Sender ausfällt, müssen die korrekten Prozesse später so entscheiden, wie der abgestürzte Prozess. 	\\
+\textbf{Grundidee:} Alle Prozesse warten N Runden, bevor sie entscheiden. Spätestens nach N Runden wurde der Wert auch im ungünstigsten Fall propagiert. \\
+Regular Consensus entscheidet zu früh, Uniform Consensus wartet. (Insb. wenn der Sender abstürzt.)
+
+\subsubsection{Unif. Cons. durch Flooding}
+\textbf{Implementationsidee:} Auslieferung erst nach N \textit{beb}-Runden (Best Effort Broadcast). Warum N? \\
+Weil beb ggf. nur einen Prozess erreicht. Kommunikationskette über N bebs sorgt dafür, dass alle Prozesse die Information erhalten. Falls kein Prozess erreicht wird, gibt es keine Senderentscheidung. Nur die korrekten Prozesse, die an allen N Runden teilgenommen haben, entscheiden. \\
+\textbf{Komplexität:} N Runden mit je $N^{2}$ Nachrichten = $N^{3}$
+
+\subsection{Wechselseitiger Ausschluss}
+Zur gemeinsamen aber nicht gleichzeitigen Nutzung von Ressourcen, realisierbar zB durch Semaphore.\\
+Anforderungen:
+\begin{enumerate}
+	\item Safety: zu jedem Zeitpunkt max. 1 Prozess in critical section
+	\item Liveness: kein deadlock, keine starvation
+	\item Ordering: Wenn $P_{i}$ vor $P_{j}$ um Eintritt in die critical section gebeten hat, betritt er auch zuerst den Bereich.
+	\item Fehlertoleranz: 1. und 2. müssen auch bei Fehlern erfüllt sein
+\end{enumerate}
+
+\subsubsection{Maekawa-Algorithmus}
+\textbf{Grundidee:} Um kritischen Abschnitt zu betreten, müssen nicht alle Prozesse zustimmen. Die Zustimmung einer Teilmenge reicht, solange die Teilmengen überlappend sind. Prozesse haben nur eine Stimme und stimmen für andere Prozesse ab, den kritischen Bereich zu betreten. \\
+\textbf{Annahmen:} Prozesse sind korrekt und wir haben pp2p Links. \\ \\
+\textbf{Algorithmus:} \\
+Jeder Prozess $p_{i}$ hat eine Wählermenge $V_{i} \subseteq \{p_{1}, p_{2}, ..., p_{N}\}$
+\begin{itemize}
+	\item $p_{i}$ ist selbst Element von $V_{i}$
+	\item Für alle $V_{i}, V_{j}$ gilt: Es gibt mindestens ein gemeinsames Element (Überlappung)
+	\item Um fair zu sein, enthält die Menge $V_{i}$ genau K Elemente. Jeder Prozess $p_{i}$ ist dann in M Mengen vertreten.
+\end{itemize}
+Man kann erreichen, dass K $\approx N^{\frac{1}{2}}$ ist und M=K gilt. Dann werden nur $3N^{\frac{1}{2}}$ Nachrichten für das Betreten des kritischen Abschnitts benötigt.
+
+\begin{lstlisting}
+Initialization:
+	state := RELEASED;
+	voted := FALSE;
+	
+For p_i to enter the critical section:
+	state := WANTED;
+	Multicast request to all processes in V_i;
+	wait until(number of replies received = K);
+	state := HELD;
+	
+On receipt of a request from p_j at p_i:
+	if (state = HELD or voted = TRUE)
+	then
+		queue request from p_j without replying;
+	else
+		send reply to p_j;
+		voted := TRUE;
+	end if
+	
+For p_i to exit the critical section
+	state := RELEASED;
+	Multicast release to all processes in V_i;
+	
+On receipt of a release from p_i at p_j
+	if (queue of requests is non-empty)
+	then
+		remove head of queue;
+		send reply to p_k;
+		voted := TRUE;
+	else
+		voted := FALSE;
+	end if
+\end{lstlisting}
+
+\textbf{Eigenschaften:} \\
+\begin{itemize}
+	\item \textbf{Korrektheit:}
+		\begin{itemize}
+			\item \textbf{Sicherheitseigenschaft:} Es können nicht 2 Prozesse gleichzeitig im kritischen Abschnitt sein, weil $V_{i} \cap 									V_{j} \neq \emptyset$ und die Prozesse, die in $V_{i}$ und $V_{j}$ sind, nur eine Stimme abgegeben haben.
+			\item \textbf{Lebendigkeit} und \textbf{Reihenfolge:} Ja, wenn Zeitstempel eingeführt wird
+		\end{itemize}
+	\item \textbf{Fehlertoleranz}: Was passiert, wenn Nachrichten verloren gehen oder Prozesse abstürzen? Maekawa toleriert Prozessabstürze, solange diese nicht zur Wählermenge gehören.
+	\item \textbf{Komplexität:} Eintritt in kritischen Abschnitt erfordert $3\sqrt{N}$ Nachrichten.
+\end{itemize}
+
+\textbf{Maekawa ist nicht Deadlockfrei} \\
+Beispiel: 3 Prozesse $p_{1}$, $p_{2}$, $p_{3}$ mit folgenden Wählermengen: \\
+$V_{1} = \{p_{1}, p_{2}\}$ \\
+$V_{2} = \{p_{2}, p_{3}\}$ \\
+$V_{3} = \{p_{3}, p_{1}\}$ \\
+\textbf{Annahme:} Alle drei wollen gleichzeitig in den kritischen Bereich: \\
+$p_{1}$ erlaubt $p_{2}$ $\rightarrow$ voted = TRUE \\
+$p_{2}$ erlaubt $p_{3}$ $\rightarrow$ voted = TRUE \\
+$p_{3}$ erlaubt $p_{1}$ $\rightarrow$ voted = TRUE \\
+Keiner besitzt die Mehrheit, alle blockieren. \\
+Der Algorithmus kann durch Einführung von Lamport-Zeitstempeln deadlockfrei gemacht werden, der den frühsten Kandidaten bevorzugt.
+
+\section{Wahlalgorithmen}
+\subsection{Zweck von Wahlalgorithmen}
+In vielen verteilten Systemen wird ein Prozess mit herausragender Rolle benötigt (Koordinator, Monitor, ...). Aufgabe des Wahlalgorithmus ist die Bestimmung dieses Prozesses unter vielen, sodass sich am Ende alle einig sind, wer gewählt wurde. \\
+\textbf{Voraussetzungen}
+\begin{itemize}
+	\item Prozesse sind unterscheidbar
+	\item Jeder Prozess kennt die Prozessnummern aller anderen Prozesse
+	\item Aber: Kein Prozess weiß, welche anderen Prozesse gerade laufen.
+\end{itemize}
+Ein Prozess initiiert den Wahlvorgang, darf aber gleichzeitig nicht 2 Vorgänge starten. Allerdings können mehrere Prozesse gleichzeitig eine Wahl initiieren, zB wenn der Leader ausgefallen ist und dies gleichzeitig festgestellt wird. \\
+O.B.d.A.: Der Leader ist der korrekte Prozess mit der höchsten ID. \\
+\textbf{Anforderungen:}
+\begin{itemize}
+	\item E1 \textbf{Sicherheit:} Jeder Wahlteilnehmer $p_{i}$ hat am Ende $elected_{i} = P$, wobei P der korrekte Prozess mit höchster ID ist.
+	\item E2 \textbf{Lebendigkeit:} Alle korrekten Wahlteilnehmer $p_{i}$ haben am Ende $elected_{i} = P$.
+\end{itemize}
+
+\subsection{Ring-Algorithmus von LeLann}
+Prozesse sind in unidirektionalem logischen Ring angeordnet. Jeder Prozess kennt seinen direkten und seine indirekten Nachfolger. \\
+\textbf{Nachrichtenarten:} \\
+\textbf{e-Nachricht (election):} um neuen Koordinator zu wählen \\
+\textbf{c-Nachricht (coordinator):} um gewählten Koordinator bekanntzugeben \\
+\begin{itemize}
+	\item Start
+		\begin{itemize}
+			\item Der Algorithmus wird von beliebigem $p_{i}$ gestartet
+			\item $p_{i}$ sendet e-Nachricht mit seiner Prozessnummer an seinen Nachfolger $p_{i+1}$
+			\item Antwortet $p_{i+1}$ nicht, wird angenommen, er ist ausgefallen. Dann wird die e-Nachricht an $p_{i+2}$ gesendet.
+		\end{itemize}
+	\item Ablauf
+		\begin{itemize}
+			\item e- oder c-Nachrichten enthalten Liste mit Prozessnummern
+			\item bei Empfang einer e-Nachricht:
+				\begin{itemize}
+					\item Ist die eigene Nummer nicht dabei, wird sie hinzugefügt und die Nachricht an den Nachfolger geschickt
+					\item ist sie dabei, ist die Nachricht einmal um den Ring gelaufen. $p_{i}$ sendet nun eine c-Nachricht
+				\end{itemize}
+			\item bei Empfang einer c-Nachricht
+				\begin{itemize}
+					\item Prozess mit der höchsten Nummer in der Liste ist der neue Koordinator
+					\item ist die c-Nachricht einmal um den Ring gelaufen, wird sie gelöscht
+				\end{itemize}
+		\end{itemize}
+\end{itemize}
+
+\subsection{Ring-Algorithmus von Chang und Roberts}
+Wie LeLann, aber die e-Nachricht enthält nur eine Prozessnummer. Alle Prozesse besitzen eine Prozessnummer und der korrekte Prozess mit der höchsten Nummer wird neuer Leader. Die Wahl wird durch eine \textbf{election message} gestartet, der Leader wird in einer \textbf{elected message} bekannt gegeben. \\
+Erhält ein Prozess eine election-Nachricht mit einer geringeren Nummer als der eigenen, ersetzt er diese durch seine Prozessnummer und sendet die Nachricht weiter. \\ \\
+\subsubsection{Korrektheit}
+\begin{itemize}
+	\item \textbf{E1 Sicherheit:} Jeder Teilnehmer $p_{i}$ hat am Ende \textit{leader = P}, wobei P der korrekte Prozess mit der höchsten ID ist. Da eine erfolgreiche Nachricht einmal um den Ring läuft, werden alle ID's verglichen
+	\item \textbf{E2 Liveness:} Alle korrekten Teilnehmer $p_{i}$ haben am Ende \textit{leader = P}. Falls keine Prozesse ausfallen, läuft die election-Nachricht maximal zweimal um den Ring und der Alg. terminiert nach einer weiteren Runde mit elected-Nachrichten.
+\end{itemize}
+\subsubsection{Komplexität}
+\begin{itemize}
+	\item Schlechtester Fall: Vorgänger hat höchste Prozessnummer $\rightarrow$ N-1 Hops zum Erreichen. Dieser erkennt dann aber noch nicht, dass er Leader ist und sendet die Nachricht erneut um den Ring $\rightarrow$ weitere N hops. Noch einmal N hops werden für die elected-Nachrichten benötigt. $\Rightarrow$ 3N-1 Nachrichten
+	\item Bester Fall: Wir sind Leader $\Rightarrow$ 2N-1 Nachrichten
+\end{itemize}
+
+\subsection{Bully-Algorithmus}
+Findet den aktiven Knoten mit höchster PID, macht ihn zum Leader und teilt dies allen anderen mit. Jeder Prozess kann den Algorithmus starten, wenn er merkt, dass der bisherige Koordinator ausgefallen ist. \\
+\subsubsection{Eigenschaften:}
+\begin{itemize}
+	\item Prozesse dürfen ausfallen (crash-recovery)
+	\item Jeder Prozess kennt alle anderen und kann Nachrichten an sie senden
+	\item Synchrones System mit Timeouts zum Erkennen von Ausfällen (perfekter Ausfalldetektor)
+\end{itemize}
+\subsubsection{Nachrichtentypen:}
+\begin{itemize}
+	\item election e: Leitet Wahl ein
+	\item answer a: Antwort auf e-Nachricht
+	\item coordinator c: Bekanntmachen des Leaders
+\end{itemize}
+\subsubsection{Funktionsweise}
+\begin{enumerate}
+	\item Prozess $p_{i}$ sendet e-Nachricht an alle Prozesse $p_{j}$, j > i
+		\begin{itemize}
+			\item Antwortet innerhalb Zeit T niemand, ist $p_{i}$ der neue Leader
+			\item erhält $p_{i}$ innerhalb T eine a-Nachricht, wartet er eine längere Zeit T'. Kommt bis dahin keine c-Nachricht, startet er den Algorithmus neu.
+		\end{itemize}
+	\item Erhält $p_{j}$ eine e-Nachricht von $p_{i}$, antwortet er und startet ebenfalls den Algorithmus
+	\item Erhält $p_{j}$ eine c-Nachricht von $p_{i}$, setzt er \textit{elected = }$p_{i}$
+	\item Ist ein Prozess nach Ausfall wieder aktiv, startet er den Algorithmus
+	\item der Prozess mit höchster PID ernennt sich selbständig zum Koordinator und schickt c-Nachricht an alle
+\end{enumerate}
+\includegraphics[width=15cm]{bullyfunktion.png} \\
+\subsubsection{Eigenschaften}
+\begin{itemize}
+	\item synchroner Algorithmus
+	\item Es kann vorkommen, dass sich 2 Prozesse für den Koordinator halten
+\end{itemize}
+\subsubsection{Komplexität}
+\begin{itemize}
+	\item Bester Fall: N-2 Nachrichten: Prozess mit zweithöchster PID erkennt Ausfall des Koordinators, ernennt sich selbst und schickt N-2 c-Nachrichten
+	\item Schlechtester Fall: O($N^{2}$) Nachrichten: Prozess mit kleinster ID schickt allen N-1 höheren Prozessen e-Nachrichten, diese schicken N-2 e-Nachrichten usw...
+\end{itemize}
+\subsection{Echo-Algorithmus}
+Für beliebige zusammenhängende, ungerichtete Graphen. \\
+Erzeugt einen Spannbaum mit dem Initiator als Wurzel. Hin- und Rückwelle mit gleichen Tokens.
+
+\begin{lstlisting}
+received = 0;
+father = NULL;
+Initiator:
+	forall (q in neighbours) do
+		send <token> to q;
+	while (received < #neighbours) {
+		receive <token>;
+		received = received + 1;
+	}
+	decide
+	
+Participant:
+	receive <token> from neighbour q;
+	father = q;
+received = received + 1;
+	forall (q in neighbours, q notEquals father) do
+		send <token> to q;
+	while (received < #neighbours) do {
+		receive <token>;
+		received = received + 1;
+}
+send <token> to father;
+\end{lstlisting}
+\subsubsection{Eigenschaften}
+\begin{itemize}
+	\item Spannbaum
+		\begin{itemize}
+			\item durch father-Kanten gegeben, über den die Rücknachrichten laufen
+			\item Spannbaum wird aber in Hinwelle festgelegt
+			\item Abschluss des Baumaufbaus über Rückwelle indiziert
+		\end{itemize}
+	\item Komplexität: Auf jeder Kante werden max. 2 Nachrichten gesendet $\rightarrow$ O(2E)
+	\item Termination: Jeder Prozess sendet maximal eine Nachricht auf jeder Kante
+	\item Entscheidung: Der Initiator (Wurzel) erhält auf jeder Kante eine Nachricht, sofern alle Prozesse korrekt sind
+\end{itemize}
+Beispiel Foliensatz 9 ab Folie 23!
+\section{Transaktionen}
+\subsection{Definition}
+Folge von Operationen, die als unteilbare logische Einheit ausgeführt wird. Es werden entweder alle oder keine Operationen ausgeführt und das Ergebnis ist erst am Ende sichtbar.
+\subsection{Transaktionen in Verteilten Systemen}
+\begin{itemize}
+	\item Klassische Transaktionen trennen zwischen Datenbasis (DB) und Client/Anwendung. Hierbei liegt der Fokus auf Konsistenz der Daten, nicht auf Verfügbarkeit. Ablauf: konsist. DB $\rightarrow$ BOT $\rightarrow$ read/write $\rightarrow$ EOT $\rightarrow$ konsist. DB
+	\item Verteilte Systeme legen den Fokus auf \underline{Verfügbarkeit}. Konsistenz ist oft unklar. Das Transaktionssystem löst zwei zentrale Probleme: \textbf{Ausfalltransparanz} (wie oben) und zusätzlich \textbf{Nebenläufigkeitstransparenz}
+\end{itemize}
+\subsection{Fehlermodell}
+Das Transaktionssystem garantiert immer einen konsistenten Zustand, auch bei nebenläufigem Zugriff, wenn Server oder Clients abstürzen oder Nachrichten verspätet oder gar nicht ausgeliefert werden. Die folgenden Ausfälle werden toleriert:
+\begin{itemize}
+	\item Fehlschlagen von Schreiboperationen oder Defekt von Speicher anhand einer Prüfsumme
+	\item Absturz von Server oder Clients, beim Neustart wird der vorige Zustand aus Logs wiederhergestellt
+	\item Nachrichten werden verzögert oder gehen verloren, dürfen aber nicht gefälscht sein
+	\item \textbf{Byzantinische (bösartige) Fehler sind nicht erlaubt!}
+\end{itemize}
+\subsection{ACID}
+\begin{itemize}
+	\item \textbf{Atomicity:} Alle oder keine Operationen werden ausgeführt
+	\item \textbf{Consistency:} Transaktion überführt das System von einem konsistenten Zustand in einen anderen
+	\item \textbf{Isolation:} Tansaktionen arbeiten unabhängig voneinander
+	\item \textbf{Durability:} Nach EOT sind Ergebnisse persistiert
+\end{itemize}
+
+\subsection{Nebenläufige Transaktionen}
+Ziel: Möglichst viel Nebenläufigkeit erlauben und dabei Konflikte korrekt einkalkulieren. Ohne Nebenläufigkeitskontrolle können folgende Probleme auftreten:
+\begin{itemize}
+	\item Lost Update: Zwei Transaktionen lesen alten Wert und arbeiten beide darauf
+	\item Inconsistent Retrieval: Transaktionen arbeiten auf inkonsistenten Zwischenwerten
+\end{itemize}
+\subsubsection{Serielle Äquivalenz} \label{serEquiv}
+Zwei Operationen stehen zueinander in Konflikt, wenn sie auf die selben Daten zugreifen und mindestens eine Operation schreiben will. \\
+Zwei Transaktionen stehen in Konflikt, wenn es konfligierende Operationen gibt. \\
+Zwei Transaktionen $T_{1}$ und $T_{2}$ sind \textbf{serialisiert} ($T_{1} \rightarrow T_{2}$), falls gilt: \\
+$\forall$ Paare der in Konflikt stehenden Operationen $op_{1} \in T_{1}$ und $op_{2} \in T_{2}$ gilt: $op_{1} \rightarrow op_{2}$. \\
+Die Ausführung der Transaktionen $T_{1}$, $T_{2}$, ..., $T_{m}$ ist äquivalent zu ihrer Ausführung in serieller Reihenfolge $T_{i_{1}} \rightarrow T_{i_{2}} \rightarrow ... \rightarrow T_{i_{m}}$ \\
+\textbf{Serielle Äquivalenz löst das Lost Update und Inconsistent Retrievals-Problem.}
+\subsection{Recovery}
+Wenn eine Transaktion abgebrochen wird (abort), muss
+sichergestellt werden, dass andere Transaktionen keine
+Seiteneffekte sehen (Isolations-Eigenschaft). \\
+Probleme:
+\begin{itemize}
+	\item Dirty Read: Transaktion A liest Objekt einer Transaktion B, die später abgebrochen wird
+	\item Premature Write: Interaktion zwischen Schreiboperationen auf
+demselben Objekt durch zwei Transaktionen, von denen eine abbricht.
+\end{itemize}
+\subsubsection{Wiederherstellung nach Abbrüchen}
+Eine Transaktion, die festschreibt, nachdem sie die
+Ergebnisse einer noch offenen Transaktion benutzt hat, lässt
+sich nicht zurückfahren. Für die Wiederherstellbarkeit muss ein Commit solange
+verzögert werden, bis alle offenen Transaktionen abgeschlossen
+sind, deren Ergebnisse benutzt wurden. \\
+\textbf{Problem:} kaskadierende Abbrüche!
+
+\subsection{Nebenläufigkeitskontrolle}
+Erstellung eines Ablaufplans für in Konflikt stehende Operationen, der serielle Äquivalenz einhält. \\
+Realisierung: Durch Locks oder Regel: Transaktion darf keine neuen Sperren anfordern, nachdem sie die erste Sperre aufgehoben hat.
+\subsubsection{2 Phase Locking}
+\includegraphics[width=10cm]{2pl.png} \\
+\textbf{Ablauf:}
+\begin{itemize}
+	\item Bei Eingang einer Operation op(T,x): Prüfung, ob Konflikt mit anderen
+Operationen, für die schon ein Lock vergeben ist. Falls ja, wird op(T,x)
+verzögert, falls nein, bekommt T das Lock für x.
+	\item Scheduler gibt Lock für x erst ab, wenn Data Manager bestätigt, dass die Operation ausgeführt wurde, für die gelockt wurde.
+	\item Nachdem ein Lock für T aufgehoben wurde, wird kein neues Lock mehr für T erteilt
+\end{itemize}
+\textbf{Problem:} Kaskadierende Abbrüche \\
+\textbf{Lösung:} Strong 2PL: Alle Locks werden zur gleichen Zeit aufgehoben: \\
+\includegraphics[width=10cm]{s2pl.png}
+
+\subsubsection{Granularität}
+Ein Sperrtyp für alle Daten ist nicht praktikabel. Eine bessere Lösung ist es, viele Lese- aber nur einen Schreibzugriff zuzulassen. Leseoperationen verwenden shared locks, Schreibzugriffe verwenden exclusive locks. Lesesperren können zu Schreibsperren "`promoted"' werden, wenn sie nicht geshared sind. \\
+Regeln:
+\begin{itemize}
+	\item Wenn T auf einem Objekt eine \textbf{Leseoperation} durchgeführt hat, darf
+eine nebenläufige Transaktion U darauf nicht schreiben, bis T ein
+commit oder abort durchgeführt hat.
+	\item Wenn T auf einem Objekt eine \textbf{Schreiboperation} durchgeführt hat, darf
+eine konkurrierende Transaktion U weder lesen noch schreiben, bis T ein
+commit oder abort durchgeführt hat.
+\end{itemize}
+\subsection{Deadlocks}
+Zustand, bei dem jedes Mitglied einer Gruppe darauf wartet, dass ein anderes die Sperre freigibt. Je feingranularer die Nebenläufigkeitskontrolle, desto geringer die Gefahr von Deadlocks.
+\subsubsection{Wait-for-Graph}
+beschreibt Wartebeziehungen zwischen Transaktionen. Knoten = Transaktionen, Kanten sind Wartebeziehungen. Eine Kante existiert von T nach U, wenn T darauf wartet, dass U eine Sperre freigibt. \\
+\textbf{Beispiel:}
+\begin{itemize}
+	\item T, U und V besitzen Lesesperre für c (blau)
+	\item W besitzt Schreibsperre für b (blau)
+	\item T und W wollen Schreibsperre auf c setzen (rot)
+	\item jede Transaktion wartet nur auf ein Objekt, trotzdem ist V in 2 Zyklen (V-W, V-W-T)
+	\item Lösung: V abbrechen und die Zyklen auflösen
+\end{itemize}
+\includegraphics[width=8cm]{waitforgraph.png} 
+\subsubsection{Deadlockerkennung}
+Sperrmanager analysiert die Wait-for-Graphen. Wenn er einen Zyklus enthält, ist das System in einem Deadlock. Beim Einfügen neuer Kanten wird jeweils auf Zyklen überprüft. Wenn ein Zyklus gefunden wird, wird die Transaktion gesucht, deren Abbruch zur Auflösung der Zyklen führt. Mögliche Kandidaten sind die Transaktion mit den meisten Zyklen oder die, deren Sperre bald abläuft.
+\subsubsection{Vermeidung von Deadlocks}
+Die einfachste Lösung ist es, bei Transaktionseintritt einfach alle benötigten Sperren zu erwerben, was jedoch zu restriktiv ist. Besser ist es, die benötigten Objekte in einer definierten Prioritätsreihenfolge zu sperren.
+\subsection{Optimistische Nebenläufigkeitskontrollen}
+Annahme: Konflikte treten eher selten auf; Transaktionen arbeiten, als wären sie alleine. Tritt ein Konflikt auf, muss eine Transaktion abgebrochen werden. \\
+3 Phasen:
+\begin{enumerate}
+	\item Arbeitsphase: Transaktion besitzt eigene Kopie aller Daten und arbeitet darauf
+	\item Validationsphase: Nach Abschluss wird überprüft, ob es Konflikte mit anderen Transaktionen gibt/gab. Falls ja, müssen diese aufgelöst werden.
+	\item Aktualisierungsphase:  Wurde die Transaktion validiert, werden die Daten persistiert
+\end{enumerate}
+\subsubsection{Validation}
+Zu allen überlappenden Transaktionen wird serielle Äquivalenz überprüft - siehe \ref{serEquiv}. \\
+Überlappend sind alle Transaktionen, die noch nicht abgeschlossen waren, als die neue Transaktion startete (BOT). \\
+Transaktionen werden in Reihenfolge des Eintritts in Validationsphase nummeriert. Da Validationsphase kurz, kann sie als kritische Sektion implementiert werden. Dies erfordert eine global eindeutige aufsteigende Nummerierung. \\
+\textbf{Strategien}
+\begin{itemize}
+	\item Rückwärtsvalidation: Regeln werden mit denjenigen Transaktionen geprüft, die vorher in Validationsphase eintraten
+	\item Vorwärtsvalidation: Regeln werden mit noch aktiven Transaktionen geprüft, die später begonnen haben
+\end{itemize}
+\subsubsection{Rückwärtsvalidation}
+Teste ob der eigene Read-Set \footnote{Read-Set enthält alle Leseoperationen, die eigene Schreiboperationen beeinflusst haben} mit dem Write-Set früherer Transaktionen überlappt. Falls ja: Abbruch. Sehr leicht zu implementieren
+\subsubsection{Vorwärtsvalidation}
+Teste, ob der eigene Write-Set mit dem Read-Set paralleler Transaktionen überlappt. Falls ja, gibt es 2 Möglichkeiten:
+\begin{enumerate}
+	\item Abbruch der anderen und Fortführung der eigenen Transaktion
+	\item Verzögerung der Validation, bis die konkurrierenden Transaktionen beendet sind (derweil können aber weitere Transaktionen starten).
+\end{enumerate}
+\textbf{Vorteil:} Lesetransaktionen haben nie Konflikte.
+\subsubsection{Zeitstempelverfahren}
+Alle Transaktionen werden durch Start-Zeitstempel eindeutig geordnet. Anforderungen können so vollständig durch Zeitstempel sortiert werden. \\
+Regeln: 
+\begin{itemize}
+	\item Die Anforderungen einer Transaktion, ein Objekt zu \underline{schreiben}, ist nur dann gültig, wenn das Objekt zuletzt von einer früheren Transaktion gelesen oder geschrieben wurde
+	\item Die Anforderung einer T., ein Objekt zu \underline{lesen}, ist nur dann gültig, wenn
+das Objekt zuletzt von einer früheren T. geschrieben wurde.
+\end{itemize}
+Jede Transaktion T bekommt einen eindeutigen Zeitstempel ts(T). Jede Operation von T besitzt diesen. Jedes Datenobjekt besitzt 2 Zeitstempel: $ts_{RD}(x)$ und $ts_{WR}(x)$. $ts_{RD}(x)$ enthält ts(TI), wobei TI die letzte Transaktion ist, die x gelesen hat. $ts_{WR}(x)$ analog für Schreibzugriff. \\
+\textbf{Konfliktlösung:} \\
+\begin{enumerate}
+	\item Scheduler erhält read(T,x) mit Zeitstempel ts:  Wenn ts < $ts_{WR}(x)$ wurde die letzte WR Operation nach dem Start von T durchgeführt $\rightarrow$ T wird abgebrochen. Wenn ts > $ts_{WR}(x)$, darf das Read stattfinden. $ts_{RD}(x)$ wird auf max(ts, $ts_{RD}(x)$) gesetzt.
+	\item Scheduler erhält write(T,x) mit ts. Ist ts < $ts_{RD}(x)$, wird T abgebrochen, da eine jüngere Transaktion x gelesen hat. Ist ts > $ts_{RD}(x)$, darf der Wert geschrieben werden. Außerdem wird $ts_{WR}(x)$ auf max(ts, $ts_{WR}(x)$ gesetzt.
+\end{enumerate}
+
+\section{Structured Overlay Networks}
+\subsection{Gossiping}
+\begin{itemize}
+	\item Pull: Hole die Daten von Peer (am effektivsten, da keine Nachrichten versendet werden, wenn der Peer evtl. schon up to date ist)
+	\item Push: Sende Updates an Peers
+	\item PushPull
+\end{itemize}
+
+\subsection{Distributed Hash Tables (DHT)}
+...ist eine normale Hashtabelle, die verteilt ist. Jeder Knoten bietet eine lookup Operation an, um einen Wert für einen Schlüssel zurückzuliefern. Außerdem hält er routing pointers. Wird ein Wert nicht gefunden, wird auf einen anderen Knoten verwiesen. \\
+DHT's sind sehr gut skalierbar. Die Zeit, um einen Wert zu finden, ist genau wie die Größe der Tabelle \textbf{logarithmisch}. Die Tabelle ist selbstverwaltend, jeder Knoten ist dafür verantwortlich, Daten und Routing Pointers aktuell zu halten.
+
+\subsubsection{Wofür DHTs?}
+Verteilte Authorisierungssysteme: funktioniert auch, wenn einzelne Knoten angegriffen werden. \\
+Verteiltes Backup \\
+Verteiltes Dateisystem (braucht Replikation, für Schreibzugriffe wird Transaktionsmanagement benötigt) \\
+
+\subsection{Chord}
+Verwende einen logischen Namensraum - Identifikationsraum - der aus ID's \{0,1,2,...,N-1\} besteht. Der Identifikationsraum ist ein logischer Ring mod N und jeder Knoten wählt eine zufällige ID durch Hash H. \\
+\includegraphics[width=12cm]{chord.png} \\
+Der Nachfolger ist der erste folgende Knoten, wenn man den Ring im Uhrzeigersinn abläuft.
+\subsubsection{Datenspeicherung}
+Global bekannte Hashfunktion wird verwendet, um jedem key/value Paar eine ID H(key) zuzuweisen. Jedes item wird beim Nachfolger gespeichert. Jeder Knoten hält außerdem einen Zeiger auf seinen Nachfolger und seinen Vorgänger. Der Nachfolger eines Knotens n ist succ(n+1).
+\subsubsection{DHT Lookup}
+Für Schlüssel k, berechne H(k) und folge den Nachfolger-Zeigern, bis k gefunden wurde. \\
+\textbf{Definitionen:}
+\begin{itemize}
+	\item (a,b] ist der Teil des Rings im Uhrzeigersinn von a (ohne a selbst) und bis einschließlich b
+	\item n.foo() ist ein RPC von foo() auf n
+	\item n.bar ist ein RPC um den Wert der Variablen bar von n zu holen
+\end{itemize}
+Put und Get sind ebenfalls Lookups. Um den Lookup zu beschleunigen, wird eine Routingtabelle ("`finger table"') verwendet:
+\begin{enumerate}
+	\item Finger zeigt auf succ(n+1)
+	\item Finger zeigt auf succ(n+2)
+	\item Finger zeigt auf succ(n+4)
+	\item letzter Finger zeigt auf succ(n+$2^{M-1}$)
+\end{enumerate}
+\subsection{Ring Maintenance}
+Periodisch werden die Nachfolge- und Vorgängerzeiger aktualisiert, sodass sie auf den nächsten Vorgänger bzw. Nachfolger zeigen. (Ringstabilisierung)\\
+Wenn ein Knoten n neu dazukommt, wird sein Nachfolger durch lookup(n) gefunden und der Zeiger gesetzt. Den Rest übernimmt die Stabilisierung. \\
+Wenn ein Ring mit einem Knoten n neu erstellt wird, ist sein Nachfolger er selbst, der Vorgänger ist leer.\\
+Die Tabelleneinträge der finger table werden periodisch aktualisiert und der Index des nächsten zu reparierenden Finger wird gespeichert (initial 0).
+\subsection{Fehlerbehandlung}
+Der Ausfall eines Nachfolgerzeigers bedeutet den Zusammenbruch des Rings. \textbf{Lösung:} Ein Knoten hält eine Liste an Nachfolgern der Größe r. r = log(N) ist eine sinnvolle Wahl.\\
+Fällt ein Vorgänger aus, wird dieser Zeiger genullt.
+
+\section{Transaktionen II: Non-Blocking atomic commit}
+\subsection{Konsens- vs. Commit-Protokolle}
+Konsensprotokolle entscheiden, wie trotz unzuverlässiger Komponenten eine eindeutige Entscheidung gefällt wird, die am Ende allen bekannt ist, zB durch Mehrheitsentscheidung. Ein Beispiel dafür ist Paxos Consensus. \\
+Commitprotokolle realisieren Transaktionen durch Einsatz von Konsensprotokollen, zB 2PC, 3PC, Paxos Commit (nutzt Paxos Consensus)
+\subsection{Fehlermodell}
+Nicht-Byzantinisches Fehlermodell \\
+Erlaubte Fehler:
+\begin{itemize}
+	\item Prozesse sind unterschiedlich schnell, können jederzeit abstürzen oder neu starten
+	\item Nachrichten können verzögert oder dupliziert werden oder verloren gehen
+\end{itemize}
+Nicht erlaubt ist unerkannt korrumpierter Speicher oder Nachrichten \\
+\textbf{Annahme:} Es liegt nichtflüchtiger Speicher vor
+\subsection{2PC, 3PC}
+\subsubsection{2PC Algorithmus}
+Transaktionsmanager, Phase 1:
+\begin{itemize}
+	\item empfange req\_commit
+	\item erzeuge Transaktionsnummer T und schreibe prepare(T) in Log
+	\item sende vote\_request(T) an alle Resource Manager
+	\item warte auf Antworten
+\end{itemize}
+Transaktionsmanager, Phase 2:
+\begin{itemize}
+	\item falls von allem RMs vote\_commit(T) erhalten
+		\begin{itemize}
+			\item schreibe global\_commit(T) in Log
+			\item sende global\_commit(T) an alle RM
+			\item führe commit lokal durch und lösche Eintrag in Log
+		\end{itemize}
+	\item falls von $\geq$ 1 RM vote\_abort(T) erhalten oder Timeout:
+		\begin{itemize}
+			\item schreibe global\_abort(T) in Log
+			\item sende global\_abort(T) an alle RM
+		\end{itemize}
+\end{itemize}
+Resource Manager, Phase 1:
+\begin{itemize}
+	\item empfange vote\_request(T)
+	\item schreibe vote\_abort(T) oder vote\_commit(T) in Log
+	\item sende Entscheidung an TM
+	\item falls vote\_abort(T) führe lokal abort durch, lösche Eintrag in Log
+\end{itemize}
+Resource Manager, Phase 2:
+\begin{itemize}
+	\item warte auf global\_abort(T) oder global\_commit(T) von TM
+	\item schreibe global\_abort(T) oder global\_commit(T) in Log
+	\item antworte an TM mit ack
+	\item führe abort oder commit lokal durch und lösche Logeintrag
+\end{itemize}
+\textbf{Komplexität:}
+1 TM und N RMs \\
+Anzahl Operationen: 3N+1 Nachrichten, N+1 Schreiboperationen in Log \\
+Gesamt-Latenzzeit im Erfolgsfall: 4 Nachrichtenverzögerungen + Zeit für 2 Disk-Schreibzugriffe \\
+\textbf{Eigenschaften}
+\begin{itemize}
+	\item Atomarität: Alle oder keiner durch Protokoll garantiert
+	\item Konsistentz: garantiert durch Atomarität
+	\item Isolation: 2PC hat keine Nebenläufigkeitsanomalien, da Ergebnisse erst nach global\_commit veröffentlicht werden
+	\item Dauerhaftigkeit: Zustand ist stets persistiert
+	\item Verfügbarkeit: \textbf{Nein! 2PC blockiert}, wenn TM in Phase 2 abstürzt 
+\end{itemize}
+\subsubsection{3PC}
+Einbinden einer dritten Phase. TM sendet vote\_request() wie in 2PC und schreibt bei positiver Antwort aller RMs \textit{PRECOMMIT} in den Log. Daraufhin sendet der TM \textit{prepare\_commit} an alle RM und wartet auf ready\_commit Antworten. Danach wird commit ins Log geschrieben und global\_commit an alle RMs gesendet. \\
+\textbf{Fehlerszenarien:} \\
+Bei Wiederanlauf:
+\begin{itemize}
+	\item TM blockierte in WAIT: abort
+	\item TM blockierte in PRECOMMIT: dieser oder Ersatz-TM sendet global\_commit an alle RM
+	\item RM blockierte im PRECOMMIT: commit
+	\item RM blockierte in READY
+		\begin{itemize}
+			\item er hatte vote\_commit entschieden
+			\item aber TM hat evtl. noch nicht entschieden
+			\item bei Wiederanlauf irgendeinen anderen RM kontaktieren
+				\begin{itemize}
+					\item falls dieser in PRECOMMIT $\rightarrow$ precommit (alle RMs sind in PRECOMMIT)
+					\item sonst abort
+				\end{itemize}
+		\end{itemize}
+\end{itemize}
+
+\subsubsection{Vergleich 2PC - 3PC}
+\begin{tabular}{ll}
+\textbf{2PC} & \textbf{3PC} \\
+blockiert, wenn TM ausfällt & nicht-blockierend \\
+braucht bei Erfolg 4 Nachrichtenübertragungen & braucht 6 Nachrichtenübertragungen \\
+& benötigt perfekten Ausfalldetektor \\
+& für global verteilte Systeme 6 Schritte kaum akzeptabel
+\end{tabular}
+
+\subsection{Paxos}
+\subsubsection{Problemstellung}
+Ausfalltolerante Systeme ohne Single-Point-of-Failure. Der Transaktionsmanager muss ausfalltolerant sein und die Entscheidung über Commit/Abort muss dezentral erfolgen. Der Zustand muss dezentral gespeichert sein. \\
+Lösungsidee:
+\begin{itemize}
+	\item \textbf{Paxos Consensus:} Nutzung eines verteilten, ausfalltoleranten Konsens als Hilfsmittel
+	\item \textbf{Paxos Commit:} Transaktionsprotokoll mit Hilfe des Konsensverfahrens
+\end{itemize}
+\subsubsection{Paxos Consensus}
+Konsens in einer Gruppe verteilter Prozesse \\
+\textbf{Eigenschaften:}
+\begin{itemize}
+	\item Sicherheit:
+		\begin{itemize}
+			\item Es wird nur ein Wert gewählt
+			\item Es wird nur ein Wert gewählt, der zuvor vorgeschlagen wurde
+			\item Ein Prozess erfährt nur dann dass ein Wert gewählt wurde, wenn das auch passiert ist
+		\end{itemize}
+	\item Liveness
+		\begin{itemize}
+			\item Wenn hinreichend viele korrekte Prozesse existieren, wird letztendlich ein Wert gewählt
+			\item Falls ein Wert gewählt wurde, wird jeder beteiligte Prozess ihn letztendlich erfahren
+		\end{itemize}
+\end{itemize}
+Paxos ist sicher, aber nicht notwendigerweise lebendig. Der Algorithmus benötigt Timeouts oder Ausfalldetektoren. \\
+Idee: Mehrheitsentscheidung in einer Gruppe. Wenn die Mehrheit informiert ist, hat in jeder anderen
+Mehrheitsmenge mindestens ein Mitglied die aktuelle
+Information. Eine beliebige Minderheit darf ausfallen. \\
+\includegraphics[width=12cm]{paxusConsensus.png} \\
+\begin{enumerate}
+	\item Bevor ein Prozess einen eigenen Wert für den Konsens vorschlagen kann, prüft er, ob nicht schon ein Konsens erzielt wurde
+	\item Er versucht den bisherigen (oder falls möglich seinen eigenen) Wert bei der Mehrheit der Gruppe zu etablieren
+\end{enumerate}
+Nebenläufigkeiten werden über die Rundennummer kontrolliert - nur Anfragen mit der größten Rundennummer werden beachtet. \\
+2. gelingt nur, wenn nach 1. keine höhere Rundennummer auftauchte. \\
+\textbf{Voraussetzungen:}
+\begin{itemize}
+	\item 3 Rollen: Proposer, Acceptor, Learner
+	\item asynchrone Kommunikation
+	\item Crash Recovery (für Acceptors nichtflüchtiger Speicher vonnöten)
+	\item Acceptors sind vorab bekannt inkl. ihrer Anzahl
+	\item Minderheit der Acceptors darf ausfallen
+\end{itemize}
+\textbf{Rollen:}
+\begin{itemize}
+	\item Proposer: treiben mit eindeutigen Rundennummern das Konsensprotokoll an. Proposer versucht ohne Unterbrechung eines anderen durch 1. und 2. Phase zu kommen, dann kommt es zu einem Konsens
+	\item Acceptor: Bildet verteilten, replizierten Speicher. Sobald die Mehrheit der Acceptors ein Proposal akzeptieren, steht der Konsens fest und es gibt kein Zurück mehr.
+	\item Learner: Sammelt den Konsens ein und verteilt die Entscheidung
+\end{itemize}
+\textbf{Sonderfälle:}
+Proposer verwendet zu kleine Rundennummer: nack/naccepted Nachricht mit aktueller Runde zurückschicken, dann lernt der Proposer die aktuelle Runde. \\
+Zweiter Proposer kommt dazu: Neue Runde r+x wird gestartet, ältere accepts werden nicht bestätigt. Wechselseitige Behinderung ist möglich. \\
+Proposer fällt nach prepare/accept Nachricht aus: Anderer Proposer startet neue Runde r+x. \\
+\textbf{Komplexität:} \\
+\textit{Paxus Consensus:} \\
+\begin{tabular}{ll}
+Nachrichten: & $\geq$ maj * 4 (+1 fürs decide) \\
+Nachrichtenverzögerungen: & $\geq$ 4
+\end{tabular}
+\textit{\underline{Fast Paxos} Consensus}\\
+Kleinste Rundennummer r=1 kann auf erste Phase verzichten, da noch kein Konsens vorhanden sein kann. 
+\begin{tabular}{ll}
+Nachrichten: & $\geq$ maj * 2 (+1 fürs decide) \\
+Nachrichtenverzögerungen: & $\geq$ 2
+\end{tabular}
+
+\subsubsection{Commit mit Konsens}
+Drei Rollen:
+\begin{itemize}
+	\item 1 Transaction Manager
+	\item mehrere Replizierte Transaction Manager
+	\item mehrere Transaction Participants, einer je Ressource, die die zu einer Transaktion gehörenden lokalen Operationen ausführen (bei 2PC und 3PC RMs genannt)
+\end{itemize}
+Annahmen: Beim Start sind alle Teilnehmer bekannt und alle TPs sowie eine Mehrheit der RTM sind erreichbar. Byzantinische Fehler sind verboten. \\
+\includegraphics[width=15cm]{paxosCommitConsensus.png} \\
+\includegraphics[width=15cm]{paxosCommitConsensus2.png} \\
+\textbf{Wozu Paxos Consensus in Paxos Commit?} \\
+Nutze die Consensus Box mit ihren 2F+1 Acceptors als \underline{replizierte TMs}: Es gibt dann 2F RTMs + 1TM. Sobald F+1 RTMs von allen RMs den Status prepared sehen, ist der Status committed. \\ \\
+\textbf{Commit mit Konsens: Vergleich} \\ \\
+\begin{tabular}{p{5cm}p{5cm}}
+\textbf{Naheliegender Ansatz} & \textbf{Paxos Commit} \\
+6 Schritte & 5 Schritte (mehr Nachrichten) \\
+TM kann Lösung über Konsens lernen & TM kann Einzelentscheidungen lernen und kombinieren \\
+RTM kann Lösung über Konsens lernen oder selbst abort vorschlagen & RTM kann Einzelentscheidungen lernen oder abort vorschlagen und Gesamtentscheidung fällen.
+\end{tabular} \\
+\textbf{Vergleich 2PC und Paxos Commit:} \\ \\
+\begin{tabular}{ll}
+\textbf{2PC} & \textbf{Paxos Commit} \\
+3N+1 Nachrichten & 3N + 2F(N+1) + 1 Nachrichten \\
+N+1 stabile writes & N+2F+1 stabile writes \\
+4 Nachrichtenverzögerungen & 5 Nachrichtenverzögerungen \\
+2 stabile Schreibverzögerungen & 2 stabile Schreibverzögerungen \\
+& toleriert F Ausfälle!
+\end{tabular} \\
+Wenn F = 0 und TM = Acceptor: 2PC == Paxos 	
 \end{document}
