@@ -179,7 +179,7 @@ Modelle:
 	\item kann auf EREW simuliert werden
 	\end{itemize}
 \end{itemize}
-textbf{(n,m)-PRAM} modelliert Parallelrechner mit n Prozessoren und m Speicherworten, ähnlich einem shared memory MIMD System.
+\textbf{(n,m)-PRAM} modelliert Parallelrechner mit n Prozessoren und m Speicherworten, ähnlich einem shared memory MIMD System.
 \subsection{LogP}
 \begin{tabular}{lll}
 \textbf{L} & \textit{latency} & für kleine Nachrichten \\
@@ -309,12 +309,12 @@ Prozess besteht aus:
 \end{itemize}
 
 \subsection{Threads}
-Ein \textbf{Thread} ist Betriebssystemabstraktion einer Aktivität. Threads sind nocht voneinander isoliert und besitzen nur einen Kontext.
+Ein \textbf{Thread} ist Betriebssystemabstraktion einer Aktivität. Threads sind nicht voneinander isoliert und besitzen nur einen Kontext.
 \begin{itemize}
 	\item Einrichtung eines Threads 10 bis 20 mal schneller als eines Prozesses
 	\item Wechsel zu Thread im selben Prozess 5 bis 50 mal schneller
 	\item Threads in einem Prozess können Ressourcen gemeinsam Nutzen ohne auf Interprozesskommunikation zurückzugreifen
-	\item Aber: Threads im selben nicht gegeneinander geschützt
+	\item Aber: Threads im selben Prozess sind nicht gegeneinander geschützt
 \end{itemize}
 
 \section{Kommunikation über gemeinsamen Speicher}
@@ -389,9 +389,9 @@ Lösung: zusätzlicher Zustand \textbf{exclusive}
 \end{itemize}
 \subsection{UMA, NUMA, ccNUMA}
 \begin{itemize}
-	\item UMA: Einsockel-Multicore-Systeme $\rightarrow$ PC, Laptop
-	\item NUMA: Cray T3E (früher), Cray XT5, 6
-	\item ccNUMA: alle Mehrsockel-Multicore-Systeme
+	\item UMA (Uniform Memory Access): zentraler Speicher mit immer gleichen Zugriffszeiten - Einsockel-Multicore-Systeme $\rightarrow$ PC, Laptop
+	\item NUMA (Non-Uniform ...): Jeder Prozessor hat eigenen Speicher, gewährt anderen Prozessoren aber Zugriff - Cray T3E (früher), Cray XT5, 6
+	\item ccNUMA (cache coherent NUMA): alle Mehrsockel-Multicore-Systeme
 	\item DM: Cluster
 \end{itemize}
 
@@ -497,7 +497,7 @@ Eine Vektoruhr hat dann die Form $V_{i}$ = (0,1,4,1) für 4 Prozesse.
 \subsubsection{Vergleich von Vektorzeitstempeln}
 Für zwei Vektoruhren V und V' gilt:
 \begin{itemize}
-	\item V = V' genau dann wenn V[i] ) V'[i] für i $\in$ 1,2,...,N
+	\item V = V' genau dann wenn V[i] = V'[i] für i $\in$ 1,2,...,N
 	\item V $\leq$ V' genau dann wenn V[i] $\leq$ V'[i] für i $\in$ 1,2,...,N
 	\item V < V' genau dann wenn V $\leq$ V' $\wedge$ V != V'
 	\item V || V' genau dann wenn $\neg$(V < V') $\wedge$ $\neg$(V' < V) $\rightarrow$ nebenläufig. Beispiel: (2,1,0) und (0,0,1)
@@ -514,14 +514,14 @@ Chandy-Lamport Algorithmus 1985: "`Distributed Snapshot Algorithm"', ermittle ei
 Gegeben:
 \begin{itemize}
 	\item System mit N Prozessen $p_{i}$
-	\item Menge der globalen Zustände S = ($s_{1}$, ..., $s_{n}$ wird betrachtet. Welche sind möglich?
+	\item Menge der globalen Zustände S = ($s_{1}$, ..., $s_{n}$) wird betrachtet. Welche sind möglich?
 	\item Jeder Prozess kann durch die \textbf{history} seiner Ereignisse charakterisiert werden: \\
 				history($p_{i}$) = $h_{i}$ = <$e_{i}^{0}, e_{i}^{1}, e_{i}^{2}$, ...>
 	\item Jedes endliche Präfix der Geschichte eines Prozesses wird bezeichnet mit: \\
 				$h_{i}^{k}$ = <$e_{i}^{0}, e_{i}^{1}, e_{i}^{2}$, ..., $e_{i}^{k}$>
 \end{itemize}
 \textbf{Definition}: Ein \textbf{Schnitt} ist eine Teilmenge der globalen history, d.h. \\
-C = $h_{1}^{c1} \cup h_{2}^{c2} \cup$ ... $\cup h_{N}^{cN}$ \\ \\
+C = $h_{1}^{c_{1}} \cup h_{2}^{c_{2}} \cup$ ... $\cup h_{N}^{c_{N}}$ \\ \\
 Aus Sicht des Prozesses $p_{i}$ gilt: Der Zustand $s_{i}$ im globalen Zustand S, der dem Schnitt C entspricht, ist genau derjenige, der von $p_{i}$ durch das Ausführen des letzten Ereignisses im Schnitt erreicht wird, also $e_{i}^{c_{i}}$ . \\
 Die gesamte Ereignismenge \{$e_{i}^{c_{i}}$: i = 1,...,N\} wird als Grenze (frontier) bezeichnet. \\
 Ein Schnitt ist \textbf{konsistent}, wenn er für jedes Ereigniss, das er enthält, auch alle Ereignisse enthält, die zu diesem in der happens-before Relation stehen: $\forall e \in C, f \rightarrow e \Rightarrow f \in C$ \\
@@ -666,7 +666,7 @@ zuletzt gelesenen Wert, egal von welcher Kopie x zuletzt gelesen wurde. \\
 
 \section{Erlang}
 dynamisch getypte Sprache mit schwachen Methoden, um eigene Datentypen zu bauen. 
-Real-Time Garbage Collectin, wobei jeder Prozess seinen eigenen Heap besitzt.
+Real-Time Garbage Collection, wobei jeder Prozess seinen eigenen Heap besitzt.
 \subsection{"`Variablen"'}
 \begin{itemize}
 	\item bekommen nur einmal einen Wert zugewiesen
@@ -685,7 +685,7 @@ f() -> 27. \\ \\
 g(1) -> 1; \\
 g(X) -> f() + X. \\ \\
 h(X, Y) -> \\
-\hspace*{5mm} Z = g(Y), \\
+\hspace*{5mm} Z := g(Y), \\
 \hspace*{5mm} X + Z. \\ \\
 
 Beispiel simple\_math.erl: \\
@@ -805,7 +805,7 @@ Es gibt Ausfalldetektoren für partiell und vollständig synchrone Systeme. \\
 \end{itemize}
 \textbf{Korrektheit (Grundidee)} \\
 \begin{itemize}
-	\item Vollständigkeit: Wenn ein Prozess abstürzt, sendet er keine Hearbeats mehr. Der Ausfalldetektor erhält dann wegen der pp2p-Links keine Heartbeats mehr und er erkennt P als abgestürzt.
+	\item Vollständigkeit: Wenn ein Prozess abstürzt, sendet er keine Heartbeats mehr. Der Ausfalldetektor erhält dann wegen der pp2p-Links keine Heartbeats mehr und er erkennt P als abgestürzt.
 	\item Genauigkeit: Nur wenn ein Prozess keine Heartbeats mehr schickt, kann er als
 abgestürzt erkannt werden.
 \end{itemize}
@@ -928,7 +928,7 @@ Grundlegendes Problem in verteilten Systemen. Anwendungen unter andererem:
 	\item Deadlockerkennung
 	\item Broad-/Multicast
 	\item Election
-	\item Mutual Exclusio
+	\item Mutual Exclusion
 \end{itemize}
 \subsection{Regulärer Konsens}
 Grundidee: Prozesse tauschen vorgeschlagene Werte in Runden aus und einigen sich nach N Runden. \\
@@ -1220,7 +1220,7 @@ Folge von Operationen, die als unteilbare logische Einheit ausgeführt wird. Es w
 \subsection{Transaktionen in Verteilten Systemen}
 \begin{itemize}
 	\item Klassische Transaktionen trennen zwischen Datenbasis (DB) und Client/Anwendung. Hierbei liegt der Fokus auf Konsistenz der Daten, nicht auf Verfügbarkeit. Ablauf: konsist. DB $\rightarrow$ BOT $\rightarrow$ read/write $\rightarrow$ EOT $\rightarrow$ konsist. DB
-	\item Verteilte Systeme legen den Fokus auf \underline{Verfügbarkeit}. Konsistenz ist oft unklar. Das Transaktionssystem löst zwei zentrale Probleme: \textbf{Ausfalltransparanz} (wie oben) und zusätzlich \textbf{Nebenläufigkeitstransparenz}
+	\item Verteilte Systeme legen den Fokus auf \underline{Verfügbarkeit}. Konsistenz ist oft unklar. Das Transaktionssystem löst zwei zentrale Probleme: \textbf{Ausfalltransparenz} (wie oben) und zusätzlich \textbf{Nebenläufigkeitstransparenz}
 \end{itemize}
 \subsection{Fehlermodell}
 Das Transaktionssystem garantiert immer einen konsistenten Zustand, auch bei nebenläufigem Zugriff, wenn Server oder Clients abstürzen oder Nachrichten verspätet oder gar nicht ausgeliefert werden. Die folgenden Ausfälle werden toleriert:
@@ -1282,7 +1282,7 @@ verzögert, falls nein, bekommt T das Lock für x.
 	\item Scheduler gibt Lock für x erst ab, wenn Data Manager bestätigt, dass die Operation ausgeführt wurde, für die gelockt wurde.
 	\item Nachdem ein Lock für T aufgehoben wurde, wird kein neues Lock mehr für T erteilt
 \end{itemize}
-\textbf{Problem:} Kaskadierende Abbrüche \\
+\textbf{Problem:} Kaskadierende Abbrüche durch dirty read \\
 \textbf{Lösung:} Strong 2PL: Alle Locks werden zur gleichen Zeit aufgehoben: \\
 \includegraphics[width=10cm]{s2pl.png}
 
@@ -1417,6 +1417,8 @@ Nicht erlaubt ist unerkannt korrumpierter Speicher oder Nachrichten \\
 \textbf{Annahme:} Es liegt nichtflüchtiger Speicher vor
 \subsection{2PC, 3PC}
 \subsubsection{2PC Algorithmus}
+\begin{tabular}{l|l}
+\begin{minipage}[t]{8cm}
 Transaktionsmanager, Phase 1:
 \begin{itemize}
 	\item empfange req\_commit
@@ -1438,6 +1440,9 @@ Transaktionsmanager, Phase 2:
 			\item sende global\_abort(T) an alle RM
 		\end{itemize}
 \end{itemize}
+\end{minipage}
+&
+\begin{minipage}[t]{8cm}
 Resource Manager, Phase 1:
 \begin{itemize}
 	\item empfange vote\_request(T)
@@ -1452,6 +1457,8 @@ Resource Manager, Phase 2:
 	\item antworte an TM mit ack
 	\item führe abort oder commit lokal durch und lösche Logeintrag
 \end{itemize}
+\end{minipage}
+\end{tabular} \\ \\
 \textbf{Komplexität:}
 1 TM und N RMs \\
 Anzahl Operationen: 3N+1 Nachrichten, N+1 Schreiboperationen in Log \\
@@ -1547,13 +1554,13 @@ Proposer verwendet zu kleine Rundennummer: nack/naccepted Nachricht mit aktuelle
 Zweiter Proposer kommt dazu: Neue Runde r+x wird gestartet, ältere accepts werden nicht bestätigt. Wechselseitige Behinderung ist möglich. \\
 Proposer fällt nach prepare/accept Nachricht aus: Anderer Proposer startet neue Runde r+x. \\
 \textbf{Komplexität:} \\
-\textit{Paxus Consensus:} \\
+\textit{Paxos Consensus:} \\
 \begin{tabular}{ll}
 Nachrichten: & $\geq$ maj * 4 (+1 fürs decide) \\
 Nachrichtenverzögerungen: & $\geq$ 4
-\end{tabular}
+\end{tabular} \\ \\
 \textit{\underline{Fast Paxos} Consensus}\\
-Kleinste Rundennummer r=1 kann auf erste Phase verzichten, da noch kein Konsens vorhanden sein kann. 
+Kleinste Rundennummer r=1 kann auf erste Phase verzichten, da noch kein Konsens vorhanden sein kann. \\ \\
 \begin{tabular}{ll}
 Nachrichten: & $\geq$ maj * 2 (+1 fürs decide) \\
 Nachrichtenverzögerungen: & $\geq$ 2
@@ -1577,7 +1584,7 @@ Nutze die Consensus Box mit ihren 2F+1 Acceptors als \underline{replizierte TMs}
 6 Schritte & 5 Schritte (mehr Nachrichten) \\
 TM kann Lösung über Konsens lernen & TM kann Einzelentscheidungen lernen und kombinieren \\
 RTM kann Lösung über Konsens lernen oder selbst abort vorschlagen & RTM kann Einzelentscheidungen lernen oder abort vorschlagen und Gesamtentscheidung fällen.
-\end{tabular} \\
+\end{tabular} \\ \\
 \textbf{Vergleich 2PC und Paxos Commit:} \\ \\
 \begin{tabular}{ll}
 \textbf{2PC} & \textbf{Paxos Commit} \\
